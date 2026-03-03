@@ -1,0 +1,207 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const jobs = [
+    {
+        title: 'Mechanic',
+        company: 'GreenDrive Auto Repairs',
+        location: 'Upington, Northern Cape',
+        type: 'Full-time',
+        salary: 'R12,000 – R18,000/month',
+        description: 'Experienced mechanic needed for vehicle diagnostics, repairs, and maintenance. Must have knowledge of both petrol and diesel engines.',
+        requirements: ['3+ years experience', 'Valid driver\'s license', 'Own tools preferred', 'Knowledge of hybrid vehicles a plus'],
+        posted: '2 days ago'
+    },
+    {
+        title: 'Solar Panel Installer',
+        company: 'SunPower Solutions',
+        location: 'Upington, Northern Cape',
+        type: 'Full-time',
+        salary: 'R15,000 – R22,000/month',
+        description: 'Join the solar energy revolution! Install and maintain solar panel systems for residential and commercial properties in the sunniest city in South Africa.',
+        requirements: ['Electrical certification', 'Comfortable working at heights', 'Physical fitness', 'Experience with PV systems preferred'],
+        posted: '1 day ago'
+    },
+    {
+        title: 'Farm Worker',
+        company: 'Orange River Vineyards',
+        location: 'Upington, Northern Cape',
+        type: 'Seasonal',
+        salary: 'R8,000 – R10,000/month',
+        description: 'Seasonal workers needed for grape harvesting and vineyard maintenance along the Orange River.',
+        requirements: ['No formal qualifications required', 'Physical fitness', 'Willingness to work outdoors', 'Reliable transport'],
+        posted: '3 days ago'
+    },
+    {
+        title: 'Retail Store Manager',
+        company: 'Kalahari Mall Retailers',
+        location: 'Upington, Northern Cape',
+        type: 'Full-time',
+        salary: 'R14,000 – R20,000/month',
+        description: 'Manage daily operations of a busy retail store. Oversee staff, inventory management, and customer service.',
+        requirements: ['2+ years retail management', 'Matric certificate', 'Strong leadership skills', 'Computer literate'],
+        posted: '5 days ago'
+    },
+    {
+        title: 'Electrician',
+        company: 'Bright Spark Electrical',
+        location: 'Upington, Northern Cape',
+        type: 'Full-time',
+        salary: 'R13,000 – R19,000/month',
+        description: 'Licensed electrician for residential and commercial electrical installations, fault finding, and maintenance work.',
+        requirements: ['Wireman\'s license', '3+ years experience', 'Own transport', 'Knowledge of solar systems advantageous'],
+        posted: '1 day ago'
+    },
+    {
+        title: 'Tour Guide',
+        company: 'Kalahari Adventures',
+        location: 'Upington, Northern Cape',
+        type: 'Part-time',
+        salary: 'R6,000 – R9,000/month',
+        description: 'Lead exciting tours through the Kalahari Desert, Augrabies Falls, and along the Orange River. Share local history and culture with visitors.',
+        requirements: ['Fluent in English and Afrikaans', 'Knowledge of local history', 'First aid certificate', 'Friendly personality'],
+        posted: '4 days ago'
+    },
+    {
+        title: 'Plumber',
+        company: 'FlowRight Plumbing',
+        location: 'Upington, Northern Cape',
+        type: 'Full-time',
+        salary: 'R11,000 – R16,000/month',
+        description: 'Skilled plumber for installations, repairs, and maintenance of water and drainage systems in residential and commercial buildings.',
+        requirements: ['Plumbing qualification', '2+ years experience', 'Own tools and transport', 'Available for emergencies'],
+        posted: '6 days ago'
+    },
+    {
+        title: 'Teacher (Mathematics)',
+        company: 'Upington High School',
+        location: 'Upington, Northern Cape',
+        type: 'Full-time',
+        salary: 'R16,000 – R25,000/month',
+        description: 'Mathematics teacher needed for Grade 10-12 learners. Help shape the future of Upington\'s youth through quality education.',
+        requirements: ['B.Ed or PGCE qualification', 'SACE registration', 'Experience teaching FET phase', 'Passion for education'],
+        posted: '1 week ago'
+    },
+    {
+        title: 'Nurse (Primary Healthcare)',
+        company: 'Upington Community Clinic',
+        location: 'Upington, Northern Cape',
+        type: 'Full-time',
+        salary: 'R18,000 – R28,000/month',
+        description: 'Primary healthcare nurse to provide essential medical services to the local community. Work in a supportive team environment.',
+        requirements: ['Nursing diploma/degree', 'SANC registration', 'Primary healthcare experience', 'Community service completed'],
+        posted: '3 days ago'
+    },
+    {
+        title: 'Delivery Driver',
+        company: 'FastTrack Logistics',
+        location: 'Upington, Northern Cape',
+        type: 'Full-time',
+        salary: 'R9,000 – R12,000/month',
+        description: 'Reliable delivery driver for local and regional deliveries. Ensure timely and safe delivery of goods across the Northern Cape.',
+        requirements: ['Code C1 driver\'s license', 'Clean driving record', 'Knowledge of the area', 'Physically fit'],
+        posted: '2 days ago'
+    },
+    {
+        title: 'Welder/Fabricator',
+        company: 'Kalahari Steel Works',
+        location: 'Upington, Northern Cape',
+        type: 'Full-time',
+        salary: 'R10,000 – R15,000/month',
+        description: 'Skilled welder needed for steel fabrication, repairs, and construction projects. Work on exciting infrastructure projects in the region.',
+        requirements: ['Welding certification (MIG/TIG/Arc)', '2+ years experience', 'Ability to read technical drawings', 'Safety conscious'],
+        posted: '5 days ago'
+    },
+    {
+        title: 'Restaurant Chef',
+        company: 'Die Kalahari Restaurant',
+        location: 'Upington, Northern Cape',
+        type: 'Full-time',
+        salary: 'R12,000 – R18,000/month',
+        description: 'Creative chef to prepare traditional South African cuisine and modern dishes. Manage kitchen operations and menu development.',
+        requirements: ['Culinary qualification', '3+ years kitchen experience', 'Knowledge of SA cuisine', 'Food safety certification'],
+        posted: '4 days ago'
+    }
+];
+
+const jobTypes = ['All', 'Full-time', 'Part-time', 'Seasonal'];
+---
+
+<Layout title="Job Center - EcoCityNet">
+    <h1 class="mb-4">Job Center</h1>
+    <p class="text-lg text-gray-300 mb-8">Find your next opportunity in Upington and the Northern Cape region.</p>
+
+    <div class="mb-6 flex flex-wrap gap-2">
+        {jobTypes.map((type) => (
+            <button
+                class="job-filter-btn px-4 py-2 rounded-full text-sm font-medium transition-colors bg-gray-700 hover:bg-primary hover:text-primary-content"
+                data-filter={type}
+            >
+                {type}
+            </button>
+        ))}
+    </div>
+
+    <div class="text-sm text-gray-400 mb-6">
+        Showing <span id="job-count">{jobs.length}</span> available positions
+    </div>
+
+    <div id="jobs-grid" class="grid gap-4 mb-12">
+        {jobs.map((job) => (
+            <div class="job-card bg-gray-800/50 border border-gray-700 rounded-lg p-6 hover:border-primary/50 transition-colors" data-type={job.type}>
+                <div class="flex flex-wrap items-start justify-between gap-4 mb-3">
+                    <div>
+                        <h3 class="text-xl font-bold text-primary">{job.title}</h3>
+                        <p class="text-gray-300">{job.company}</p>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-3 py-1 bg-primary/20 text-primary rounded-full text-xs font-medium">{job.type}</span>
+                        <span class="px-3 py-1 bg-gray-700 text-gray-300 rounded-full text-xs">{job.posted}</span>
+                    </div>
+                </div>
+                <p class="text-gray-400 mb-3">{job.description}</p>
+                <div class="flex flex-wrap items-center gap-4 mb-3 text-sm">
+                    <span class="text-gray-400">📍 {job.location}</span>
+                    <span class="text-green-400 font-medium">{job.salary}</span>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    {job.requirements.map((req) => (
+                        <span class="px-2 py-1 bg-gray-700/50 text-gray-400 rounded text-xs">{req}</span>
+                    ))}
+                </div>
+            </div>
+        ))}
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const buttons = document.querySelectorAll('.job-filter-btn');
+            const cards = document.querySelectorAll('.job-card');
+            const countEl = document.getElementById('job-count');
+
+            buttons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const filter = btn.getAttribute('data-filter');
+
+                    buttons.forEach(b => {
+                        b.classList.remove('bg-primary', 'text-primary-content');
+                        b.classList.add('bg-gray-700');
+                    });
+                    btn.classList.add('bg-primary', 'text-primary-content');
+                    btn.classList.remove('bg-gray-700');
+
+                    let visible = 0;
+                    cards.forEach(card => {
+                        if (filter === 'All' || card.getAttribute('data-type') === filter) {
+                            card.style.display = '';
+                            visible++;
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                    if (countEl) countEl.textContent = String(visible);
+                });
+            });
+        });
+    </script>
+</Layout>
