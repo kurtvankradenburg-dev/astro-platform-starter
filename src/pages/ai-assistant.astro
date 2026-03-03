@@ -1,0 +1,184 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="AI Assistant - EcoCityNet">
+    <h1 class="mb-4">City AI Assistant</h1>
+    <p class="text-lg text-gray-300 mb-8">Ask anything about Upington, the Northern Cape, or any city-related topic. Try a quick question below or type your own!</p>
+
+    <div class="flex flex-wrap gap-2 mb-6">
+        <button class="quick-q btn text-sm" data-question="What is the history of Upington?">History of Upington</button>
+        <button class="quick-q btn text-sm" data-question="What are the best tourist attractions in Upington?">Tourist Attractions</button>
+        <button class="quick-q btn text-sm" data-question="What is the weather like in Upington?">Upington Weather</button>
+        <button class="quick-q btn text-sm" data-question="Tell me about the economy of the Northern Cape">Northern Cape Economy</button>
+        <button class="quick-q btn text-sm" data-question="What schools are in Upington?">Schools in Upington</button>
+        <button class="quick-q btn text-sm" data-question="What is the population of Upington?">Population</button>
+        <button class="quick-q btn text-sm" data-question="Tell me about the Orange River">Orange River</button>
+        <button class="quick-q btn text-sm" data-question="What cultural events happen in Upington?">Cultural Events</button>
+    </div>
+
+    <div class="bg-gray-800/50 border border-gray-700 rounded-lg overflow-hidden">
+        <div id="chat-messages" class="p-4 min-h-[300px] max-h-[500px] overflow-y-auto space-y-4">
+            <div class="flex gap-3">
+                <div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-sm font-bold shrink-0">AI</div>
+                <div class="bg-gray-700/50 rounded-lg p-3 text-gray-300 text-sm max-w-[80%]">
+                    Welcome to the EcoCityNet AI Assistant! I can answer questions about Upington, the Northern Cape, and any city-related topics. What would you like to know?
+                </div>
+            </div>
+        </div>
+
+        <div class="border-t border-gray-700 p-4">
+            <form id="chat-form" class="flex gap-3">
+                <input
+                    type="text"
+                    id="chat-input"
+                    placeholder="Ask me anything about cities, history, culture..."
+                    class="flex-1 bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-primary"
+                />
+                <button type="submit" class="btn px-6">Send</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const CITY_KNOWLEDGE: Record<string, string> = {
+            "history of upington": `Upington is a city in the Northern Cape province of South Africa, situated on the banks of the Orange River (Gariep River). It was established in 1884 and named after Sir Thomas Upington, the Attorney General of the Cape Colony at the time.\n\nThe area was originally inhabited by the Khoikhoi and San peoples for thousands of years. In the late 1800s, Reverend Christiaan Schröder established a mission station at the site, which later grew into the town.\n\nUpington became an important agricultural center thanks to irrigation from the Orange River, supporting vineyards, cotton, fruit, and other crops. The city is also famous for being one of the hottest places in South Africa and is a gateway to the Kalahari Desert and the Augrabies Falls National Park.\n\nDuring World War II, Upington served as a military airfield. Today it has grown into a regional hub for the Northern Cape with a population of around 80,000 people, and is known for its raisin and wine production.`,
+
+            "tourist attractions": `Upington and the surrounding Northern Cape region offer many attractions:\n\n• **Augrabies Falls National Park** – One of the largest waterfalls in the world, where the Orange River plunges 56 meters into a granite gorge.\n\n• **Kalahari Desert** – Experience the red dunes, unique wildlife, and incredible stargazing opportunities.\n\n• **Orange River** – Enjoy canoeing, rafting, and fishing along South Africa's longest river.\n\n• **Spitskop Nature Reserve** – A game reserve near Upington with various antelope species and beautiful desert landscapes.\n\n• **Kalahari-Oranje Museum** – Learn about the history and culture of the region, including the indigenous San people.\n\n• **Wine Route** – The Orange River Wine Route features several estates producing excellent wines, including the famous Orange River Cellars.\n\n• **Donkey Statue** – The iconic monument on the Orange River bridge honoring the donkeys that helped build the region.\n\n• **Sakkie se Arkie** – A popular local restaurant and cultural stop.\n\n• **Kanoneiland** – The largest river island in South Africa, known for its agricultural activities.`,
+
+            "weather": `Upington has an arid, hot desert climate (BWh according to the Köppen classification). It is one of the hottest cities in South Africa.\n\n• **Summer (October–March):** Temperatures regularly exceed 35°C (95°F), with maximums often reaching 40°C (104°F) or higher. January is typically the hottest month.\n\n• **Winter (April–September):** Mild days around 20-25°C (68-77°F) but cold nights that can drop to 0°C (32°F) or below, with occasional frost.\n\n• **Rainfall:** Very low, averaging about 125mm (5 inches) per year, mostly as summer thunderstorms.\n\n• **Sunshine:** Upington receives some of the highest solar radiation levels in the world, making it ideal for solar energy projects. The region averages over 3,400 hours of sunshine per year.\n\n• **Humidity:** Generally very low, making the heat more bearable than coastal areas.`,
+
+            "economy": `The economy of the Northern Cape and Upington region is diverse:\n\n• **Agriculture:** The area is a major producer of grapes, raisins, wine, cotton, dates, and other fruits thanks to irrigation from the Orange River. The region produces about 40% of South Africa's raisins.\n\n• **Mining:** The Northern Cape is rich in minerals including diamonds, iron ore, manganese, and copper. It produces more than 70% of the world's ferrochrome.\n\n• **Solar Energy:** Upington is a hub for renewable energy. The region hosts several large solar power plants, including the Jasper Solar Energy Project and the Khi Solar One concentrated solar power plant.\n\n• **Tourism:** Nature-based tourism centered around the Kalahari Desert, Augrabies Falls, and Orange River activities contributes significantly to the local economy.\n\n• **Government Services:** As the main town of the ZF Mgcawu District Municipality, Upington hosts many government offices and services.`,
+
+            "schools": `Upington has a number of educational institutions:\n\n• **Upington High School** – One of the oldest and most established high schools in the city.\n\n• **Duineveld High School** – A well-known Afrikaans-medium high school.\n\n• **Paballong High School** – Serving the Paballelo community.\n\n• **Oranje Oewer Primary School** – A prominent primary school.\n\n• **Saul Damon Primary School** – Named after a local community leader.\n\n• **Northern Cape Urban TVET College** – Offering technical and vocational training with a campus in Upington.\n\n• **Sol Plaatje University** (in Kimberley) – The main university serving the Northern Cape province.\n\nThe city continues to invest in education to support its growing community.`,
+
+            "population": `Upington has a population of approximately 80,000 people in the urban area, with the broader municipal area (Dawid Kruiper Local Municipality) having around 100,000 residents.\n\n• **Demographics:** The population is diverse, with Afrikaans being the most widely spoken language, followed by Setswana and English.\n\n• **Growth:** The city has seen steady growth due to agricultural expansion and the development of the solar energy industry.\n\n• **Communities:** Key neighborhoods include Upington Central, Paballelo, Progress, Keidebees, and the surrounding farming communities.\n\n• **Cultural diversity:** The area is home to various communities including descendants of the Khoikhoi, San, Griqua, Tswana, and European settlers.`,
+
+            "orange river": `The Orange River (also known as the Gariep River) is the longest river in South Africa, stretching approximately 2,200 kilometers from the Drakensberg Mountains in Lesotho to the Atlantic Ocean.\n\n• **Significance to Upington:** The Orange River is the lifeblood of Upington. The city was built on its banks, and the river provides the irrigation water that makes agriculture possible in this arid region.\n\n• **Agriculture:** The river supports extensive vineyards, orchards, and farms along its banks, creating a green corridor through the desert landscape.\n\n• **Activities:** Popular recreational activities include canoeing, kayaking, river rafting, and fishing. Multi-day canoe trips are a major tourist draw.\n\n• **Augrabies Falls:** About 120km west of Upington, the river creates the spectacular Augrabies Falls, dropping 56 meters.\n\n• **Kanoneiland:** The river forms South Africa's largest inhabited island near Upington, an important agricultural area.\n\n• **History:** The river has been a vital water source for indigenous peoples for thousands of years and played a key role in the colonization and development of the region.`,
+
+            "cultural events": `Upington and the Northern Cape host several cultural events throughout the year:\n\n• **Kalahari Kuierfees** – A popular arts and culture festival celebrating the unique Kalahari lifestyle with music, food, and entertainment.\n\n• **Upington Expo** – An annual agricultural and trade expo showcasing local products, farming equipment, and regional businesses.\n\n• **Orange River Wine Festival** – Celebrating the local wine culture with tastings, food pairings, and entertainment at various wine estates.\n\n• **Heritage Day Celebrations** (September 24) – The community celebrates South Africa's cultural diversity with braais, music, and traditional activities.\n\n• **Upington Jazz Festival** – Features local and national jazz performers.\n\n• **Kalahari Speedweek** – A motorsport event attracting speed enthusiasts to the area's long, straight desert roads.\n\n• **Namaqualand Flower Season** (August–September) – While primarily in the western Northern Cape, the wildflower bloom attracts visitors throughout the province.\n\n• **Local Markets** – Regular community markets featuring crafts, food, and local produce.`
+        };
+
+        function findBestMatch(question: string): string | null {
+            const q = question.toLowerCase();
+            const mappings: Array<{keywords: string[], key: string}> = [
+                { keywords: ['history', 'upington', 'founded', 'established', 'origin'], key: 'history of upington' },
+                { keywords: ['tourist', 'attraction', 'visit', 'see', 'places', 'things to do', 'sightseeing'], key: 'tourist attractions' },
+                { keywords: ['weather', 'climate', 'temperature', 'hot', 'cold', 'rain', 'sun'], key: 'weather' },
+                { keywords: ['economy', 'economic', 'business', 'industry', 'mining', 'agriculture', 'jobs market', 'employment rate'], key: 'economy' },
+                { keywords: ['school', 'education', 'university', 'college', 'learn', 'study'], key: 'schools' },
+                { keywords: ['population', 'people', 'residents', 'demographics', 'how many'], key: 'population' },
+                { keywords: ['orange river', 'gariep', 'river', 'water'], key: 'orange river' },
+                { keywords: ['cultural', 'events', 'festival', 'celebration', 'heritage'], key: 'cultural events' },
+            ];
+
+            for (const mapping of mappings) {
+                const matchCount = mapping.keywords.filter(kw => q.includes(kw)).length;
+                if (matchCount >= 1) {
+                    return CITY_KNOWLEDGE[mapping.key];
+                }
+            }
+            return null;
+        }
+
+        function generateGenericResponse(question: string): string {
+            const q = question.toLowerCase();
+
+            if (q.includes('transport') || q.includes('travel') || q.includes('bus') || q.includes('airport') || q.includes('flight')) {
+                return `Upington is well-connected for a Northern Cape city:\n\n• **Upington Airport** – A regional airport with regular flights to Johannesburg and Cape Town via major airlines.\n\n• **Road:** The N1 and N14 national roads connect Upington to Johannesburg, Cape Town, and Springbok. The N10 connects to Namibia via the Nakop border post.\n\n• **Bus services:** Intercape and other long-distance bus companies service Upington.\n\n• **Local transport:** Minibus taxis are the primary mode of public transport within the city.\n\nThe city serves as a transport hub for the entire Northern Cape interior region.`;
+            }
+
+            if (q.includes('food') || q.includes('restaurant') || q.includes('eat') || q.includes('cuisine') || q.includes('dish')) {
+                return `Upington offers a taste of authentic Northern Cape cuisine:\n\n• **Traditional dishes:** Enjoy local specialties like potjiekos (slow-cooked stew), boerewors, biltong, and vetkoek.\n\n• **Game meat:** The Kalahari region is known for springbok, kudu, and oryx dishes.\n\n• **Wine & Grapes:** The Orange River wine region produces excellent wines, and dried fruit (especially raisins) are a local specialty.\n\n• **Popular restaurants:** Die Kalahari Restaurant, Sakkie se Arkie, and Le Must River Residence offer great dining experiences.\n\n• **Local markets:** Fresh produce and local delicacies are available at community markets.`;
+            }
+
+            if (q.includes('safety') || q.includes('safe') || q.includes('crime') || q.includes('security')) {
+                return `Like all South African cities, Upington has areas that are safer than others. General safety tips:\n\n• Stick to well-lit, populated areas, especially at night\n• Keep valuables out of sight in vehicles\n• Use secure accommodation with proper locks\n• Be aware of your surroundings\n• The city center and tourist areas are generally safe during the day\n\nUpington is generally considered one of the safer towns in South Africa compared to major metro areas.`;
+            }
+
+            if (q.includes('health') || q.includes('hospital') || q.includes('medical') || q.includes('doctor') || q.includes('clinic')) {
+                return `Healthcare facilities in Upington include:\n\n• **Upington Hospital** – The main public hospital serving the region.\n\n• **Mediclinic Upington** – A private hospital with modern facilities.\n\n• **Community clinics** – Several clinics throughout the city providing primary healthcare.\n\n• **Emergency services** – Ambulance and emergency medical services are available.\n\nThe city serves as the healthcare hub for the broader ZF Mgcawu District.`;
+            }
+
+            if (q.includes('sport') || q.includes('rugby') || q.includes('soccer') || q.includes('cricket') || q.includes('recreation')) {
+                return `Sports and recreation in Upington:\n\n• **Rugby:** The local rugby club competes in the Northern Cape leagues. Rugby is hugely popular in the community.\n\n• **Cricket:** Upington has cricket facilities and teams competing regionally.\n\n• **Athletics:** The flat terrain and warm climate make it popular for running and athletics.\n\n• **Water sports:** Canoeing, kayaking, and fishing on the Orange River.\n\n• **Golf:** The Upington Golf Club offers an interesting desert-edge golfing experience.\n\n• **Motorsport:** The region's long, straight roads attract speed enthusiasts.`;
+            }
+
+            if (q.includes('solar') || q.includes('energy') || q.includes('renewable') || q.includes('electricity') || q.includes('power')) {
+                return `Upington is South Africa's solar energy capital:\n\n• **Solar radiation:** The region receives some of the highest levels of solar radiation in the world, averaging over 2,800 kWh/m² per year.\n\n• **Major projects:** The area hosts multiple large-scale solar installations including:\n  - Jasper Solar Energy Project (96 MW)\n  - Khi Solar One (50 MW concentrated solar power)\n  - Several other photovoltaic plants\n\n• **Economic impact:** The solar industry has created hundreds of jobs and attracted significant investment to the region.\n\n• **Future:** Upington is positioned to play a key role in South Africa's renewable energy transition.`;
+            }
+
+            if (q.includes('accommodation') || q.includes('hotel') || q.includes('stay') || q.includes('lodge') || q.includes('guesthouse') || q.includes('sleep')) {
+                return `Accommodation options in Upington:\n\n• **Hotels:** Sun River Kalahari Lodge, Protea Hotel Upington, and Desert Palace Hotel & Casino.\n\n• **Guesthouses:** Numerous B&Bs and guesthouses like Le Must River Residence and Die Eiland Holiday Resort.\n\n• **Game lodges:** Kalahari-area lodges offer unique desert experiences.\n\n• **Camping:** Several camping sites along the Orange River and near Augrabies Falls.\n\n• **Self-catering:** Apartments and holiday homes are available for longer stays.\n\nBookings are recommended during peak season (school holidays and the winter months).`;
+            }
+
+            if (q.includes('shop') || q.includes('mall') || q.includes('market') || q.includes('buy') || q.includes('store')) {
+                return `Shopping in Upington:\n\n• **Kalahari Mall** – The main shopping center with major retailers, restaurants, and entertainment.\n\n• **Town center shops** – Various stores along the main streets.\n\n• **Local markets** – Fresh produce, crafts, and local specialties.\n\n• **Checkers, Pick n Pay, Shoprite** – Major grocery chains are well-represented.\n\n• **Specialized stores:** Hardware, clothing, and electronics shops serve the regional community.\n\nUpington is the main shopping hub for the surrounding rural areas.`;
+            }
+
+            return `That's a great question! While I have detailed knowledge about Upington and the Northern Cape region, I may not have specific information on that exact topic.\n\nHere's what I can help with:\n• History and heritage of Upington\n• Tourist attractions and activities\n• Weather and climate information\n• Economy and industries\n• Schools and education\n• Population and demographics\n• The Orange River\n• Cultural events and festivals\n• Transport, food, health, sports, energy, accommodation, and shopping\n\nTry asking about any of these topics, or click one of the quick question buttons above!`;
+        }
+
+        function formatMessage(text: string): string {
+            let html = text
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n\n/g, '</p><p>')
+                .replace(/\n• /g, '<br>• ')
+                .replace(/\n  - /g, '<br>&nbsp;&nbsp;- ')
+                .replace(/\n/g, '<br>');
+            return `<p>${html}</p>`;
+        }
+
+        function addMessage(text: string, isUser: boolean) {
+            const container = document.getElementById('chat-messages');
+            if (!container) return;
+
+            const wrapper = document.createElement('div');
+            wrapper.className = `flex gap-3 ${isUser ? 'justify-end' : ''}`;
+
+            if (isUser) {
+                wrapper.innerHTML = `
+                    <div class="bg-primary/20 text-white rounded-lg p-3 text-sm max-w-[80%]">${text}</div>
+                    <div class="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center text-gray-300 text-sm font-bold shrink-0">U</div>
+                `;
+            } else {
+                wrapper.innerHTML = `
+                    <div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-sm font-bold shrink-0">AI</div>
+                    <div class="bg-gray-700/50 rounded-lg p-3 text-gray-300 text-sm max-w-[80%]">${formatMessage(text)}</div>
+                `;
+            }
+
+            container.appendChild(wrapper);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function handleQuestion(question: string) {
+            addMessage(question, true);
+
+            setTimeout(() => {
+                const knowledgeAnswer = findBestMatch(question);
+                if (knowledgeAnswer) {
+                    addMessage(knowledgeAnswer, false);
+                } else {
+                    addMessage(generateGenericResponse(question), false);
+                }
+            }, 500);
+        }
+
+        document.getElementById('chat-form')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const input = document.getElementById('chat-input') as HTMLInputElement;
+            const question = input.value.trim();
+            if (!question) return;
+            input.value = '';
+            handleQuestion(question);
+        });
+
+        document.querySelectorAll('.quick-q').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const question = btn.getAttribute('data-question');
+                if (question) handleQuestion(question);
+            });
+        });
+    </script>
+</Layout>
