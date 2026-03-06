@@ -1,0 +1,20 @@
+---
+import Layout from '../layouts/Layout.astro';
+import AuthForm from '../components/app/AuthForm';
+---
+<Layout title="Login">
+    <script>
+        (function() {
+            var token = localStorage.getItem("myogen_token");
+            if (token) {
+                fetch("/api/auth/me", { headers: { Authorization: "Bearer " + token } })
+                    .then(function(r) { return r.json(); })
+                    .then(function(data) {
+                        if (data.user) window.location.href = "/dashboard";
+                    })
+                    .catch(function() {});
+            }
+        })();
+    </script>
+    <AuthForm mode="login" client:load />
+</Layout>

@@ -1,0 +1,9 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/app/Navigation';
+import SubscriptionApp from '../components/app/SubscriptionApp';
+---
+<Layout title="Premium">
+    <Navigation activePage="/subscription" client:load />
+    <SubscriptionApp client:load />
+</Layout>
