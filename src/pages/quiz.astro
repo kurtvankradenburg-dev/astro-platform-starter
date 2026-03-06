@@ -1,0 +1,9 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/app/Navigation';
+import QuizApp from '../components/app/QuizApp';
+---
+<Layout title="Science Quiz">
+    <Navigation activePage="/quiz" client:load />
+    <QuizApp client:load />
+</Layout>

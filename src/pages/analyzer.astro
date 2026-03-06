@@ -1,0 +1,9 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/app/Navigation';
+import AnalyzerApp from '../components/app/AnalyzerApp';
+---
+<Layout title="Physique Analyzer">
+    <Navigation activePage="/analyzer" client:load />
+    <AnalyzerApp client:load />
+</Layout>

@@ -1,19 +1,495 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Markdown from '../components/Markdown.astro';
 
-const explainer = `
-An Astro website can go way beyond static pages - on the right platform.
-
-Netlify supports not only [Streaming SSR](https://docs.astro.build/en/guides/server-side-rendering/#html-streaming) and fast [Edge Middleware](https://docs.astro.build/en/guides/middleware/), but also [on-demand revalidation](https://www.netlify.com/blog/cache-tags-and-purge-api-on-netlify/) and [stale-while-revalidate](https://www.netlify.com/blog/swr-and-fine-grained-cache-control/). 
-Any page or data can be rebuilt only when needed, without site visitors ever getting a performance hit.
-`;
+export const prerender = true;
 ---
 
-<Layout title="Welcome to Astro.">
-    <h1 class="mb-10">Netlify Platform Starter for Astro</h1>
-    <Markdown content={explainer} class="mb-10 text-lg" />
-    <p>
-        <a href="https://docs.netlify.com/frameworks/astro/" class="btn btn-lg sm:min-w-64">Read the Docs</a>
-    </p>
+<Layout title="Home" noWrapper>
+    <div class="min-h-screen bg-black">
+        <!-- Auto-redirect if already logged in -->
+        <script>
+            (function() {
+                var token = localStorage.getItem("myogen_token");
+                if (token) {
+                    fetch("/api/auth/me", { headers: { Authorization: "Bearer " + token } })
+                        .then(function(r) { return r.json(); })
+                        .then(function(data) {
+                            if (data.user) window.location.href = "/dashboard";
+                        })
+                        .catch(function() {});
+                }
+            })();
+        </script>
+
+        <!-- Navigation -->
+        <nav class="fixed top-0 w-full bg-black/80 backdrop-blur-xl border-b border-blue-500/10 z-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
+                <a href="/" class="nav-link flex items-center gap-2.5 no-underline">
+                    <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
+                        <defs>
+                            <linearGradient id="nav-dna" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#00bce6" />
+                                <stop offset="100%" stop-color="#33e0ff" />
+                            </linearGradient>
+                        </defs>
+                        <path d="M13 4 C13 4, 27 9, 27 15 C27 21, 13 21, 13 27 C13 33, 27 33, 27 36" stroke="url(#nav-dna)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                        <path d="M27 4 C27 4, 13 9, 13 15 C13 21, 27 21, 27 27 C27 33, 13 33, 13 36" stroke="#33e0ff" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.5"/>
+                        <line x1="15" y1="9.5" x2="25" y2="9.5" stroke="#00d4ff" stroke-width="1.5" opacity="0.4"/>
+                        <line x1="14" y1="15" x2="26" y2="15" stroke="#00d4ff" stroke-width="1.5" opacity="0.4"/>
+                        <line x1="14" y1="21" x2="26" y2="21" stroke="#00d4ff" stroke-width="1.5" opacity="0.4"/>
+                        <line x1="14" y1="27" x2="26" y2="27" stroke="#00d4ff" stroke-width="1.5" opacity="0.4"/>
+                        <line x1="15" y1="32.5" x2="25" y2="32.5" stroke="#00d4ff" stroke-width="1.5" opacity="0.4"/>
+                    </svg>
+                    <span class="text-white font-bold text-xl tracking-tight">MYOGEN</span>
+                </a>
+                <div class="flex items-center gap-3">
+                    <a href="/login" class="nav-link text-gray-400 hover:text-white text-sm no-underline transition-colors">Sign In</a>
+                    <a href="/signup" class="nav-link btn btn-primary btn-sm no-underline">Get Started</a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <section class="pt-28 pb-20 px-4 sm:px-6 relative overflow-hidden">
+            <!-- Background anatomy silhouette -->
+            <div class="absolute inset-0 overflow-hidden pointer-events-none">
+                <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-blue-600/5 rounded-full blur-[120px]"></div>
+                <svg class="absolute right-0 top-20 w-[400px] h-[700px] opacity-[0.03]" viewBox="0 0 200 400">
+                    <path d="M100 30 C100 30 115 45 115 55 C115 65 105 70 105 70 L105 80 C105 80 125 85 130 100 C135 115 125 130 115 140 L115 170 C115 170 130 180 130 200 C130 220 120 240 115 260 L110 320 C110 340 115 360 115 380 L115 400" stroke="#00d4ff" fill="none" stroke-width="1"/>
+                    <path d="M100 30 C100 30 85 45 85 55 C85 65 95 70 95 70 L95 80 C95 80 75 85 70 100 C65 115 75 130 85 140 L85 170 C85 170 70 180 70 200 C70 220 80 240 85 260 L90 320 C90 340 85 360 85 380 L85 400" stroke="#00d4ff" fill="none" stroke-width="1"/>
+                    <circle cx="100" cy="22" r="18" stroke="#00d4ff" fill="none" stroke-width="0.8"/>
+                    <path d="M115 100 C120 105 122 115 118 125" stroke="#00d4ff" fill="none" stroke-width="0.5" opacity="0.5"/>
+                    <path d="M85 100 C80 105 78 115 82 125" stroke="#00d4ff" fill="none" stroke-width="0.5" opacity="0.5"/>
+                </svg>
+                <svg class="absolute left-0 top-40 w-[300px] h-[500px] opacity-[0.02]" viewBox="0 0 150 300">
+                    <path d="M40 0 C40 0, 110 30, 110 60 C110 90, 40 90, 40 120 C40 150, 110 150, 110 180 C110 210, 40 210, 40 240 C40 270, 110 270, 110 300" stroke="#00d4ff" fill="none" stroke-width="1.5"/>
+                    <path d="M110 0 C110 0, 40 30, 40 60 C40 90, 110 90, 110 120 C110 150, 40 150, 40 180 C40 210, 110 210, 110 240 C110 270, 40 270, 40 300" stroke="#33e0ff" fill="none" stroke-width="1.5" opacity="0.5"/>
+                </svg>
+            </div>
+
+            <div class="max-w-4xl mx-auto text-center relative z-10">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-medium mb-8">
+                    <span class="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse"></span>
+                    Science-Based Performance Analysis
+                </div>
+                <h1 class="text-4xl sm:text-5xl lg:text-7xl font-bold text-white leading-tight mb-6">
+                    Decode Your
+                    <span class="neon-text" style="text-shadow: 0 0 10px rgba(0,212,255,0.7), 0 0 30px rgba(0,212,255,0.4), 0 0 60px rgba(0,212,255,0.2);"> Genetic</span>
+                    <br />Potential
+                </h1>
+                <p class="text-lg text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+                    AI-driven physique analysis, biomechanics reasoning, and neuromuscular science — grounded in peer-reviewed research and human anatomy.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="/signup" class="nav-link btn btn-primary btn-lg no-underline animate-pulse-glow">
+                        Start Free Analysis
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                    </a>
+                    <a href="#features" class="nav-link btn btn-outline btn-lg no-underline">Explore Features</a>
+                </div>
+            </div>
+
+            <!-- Anatomy illustration cards -->
+            <div class="max-w-5xl mx-auto mt-16 grid grid-cols-3 gap-4 sm:gap-6 relative z-10">
+                <div class="bg-[#0a0a14] border border-blue-500/10 rounded-2xl p-4 sm:p-6 text-center">
+                    <div class="w-full h-32 sm:h-44 rounded-xl bg-gradient-to-b from-blue-900/20 to-transparent flex items-center justify-center mb-3 overflow-hidden">
+                        <svg viewBox="0 0 120 160" class="w-20 h-28 sm:w-24 sm:h-32 opacity-60">
+                            <path d="M60 15 C60 15 70 25 70 35 L70 50 C70 50 85 55 85 70 C85 85 75 90 70 95 L65 130 C65 140 60 150 60 155" stroke="#00d4ff" fill="none" stroke-width="1.5"/>
+                            <path d="M60 15 C60 15 50 25 50 35 L50 50 C50 50 35 55 35 70 C35 85 45 90 50 95 L55 130 C55 140 60 150 60 155" stroke="#00d4ff" fill="none" stroke-width="1.5"/>
+                            <circle cx="60" cy="10" r="8" stroke="#00d4ff" fill="none" stroke-width="1.2"/>
+                            <ellipse cx="78" cy="65" rx="6" ry="12" stroke="#00bce6" fill="rgba(0,188,230,0.1)" stroke-width="0.8"/>
+                            <ellipse cx="42" cy="65" rx="6" ry="12" stroke="#00bce6" fill="rgba(0,188,230,0.1)" stroke-width="0.8"/>
+                            <ellipse cx="63" cy="120" rx="4" ry="15" stroke="#00bce6" fill="rgba(0,188,230,0.1)" stroke-width="0.8"/>
+                            <ellipse cx="57" cy="120" rx="4" ry="15" stroke="#00bce6" fill="rgba(0,188,230,0.1)" stroke-width="0.8"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-white font-semibold text-sm sm:text-base">Muscular Analysis</h3>
+                    <p class="text-gray-500 text-xs mt-1">Mass, symmetry & conditioning</p>
+                </div>
+                <div class="bg-[#0a0a14] border border-blue-500/10 rounded-2xl p-4 sm:p-6 text-center">
+                    <div class="w-full h-32 sm:h-44 rounded-xl bg-gradient-to-b from-blue-900/20 to-transparent flex items-center justify-center mb-3 overflow-hidden">
+                        <svg viewBox="0 0 120 160" class="w-20 h-28 sm:w-24 sm:h-32 opacity-60">
+                            <line x1="60" y1="20" x2="60" y2="100" stroke="#00d4ff" stroke-width="2"/>
+                            <circle cx="60" cy="12" r="8" stroke="#00d4ff" fill="none" stroke-width="1.2"/>
+                            <path d="M48 35 C42 40 40 55 48 60" stroke="#00d4ff" fill="none" stroke-width="1"/>
+                            <path d="M72 35 C78 40 80 55 72 60" stroke="#00d4ff" fill="none" stroke-width="1"/>
+                            <path d="M48 68 C42 72 40 80 50 85" stroke="#00d4ff" fill="none" stroke-width="1"/>
+                            <path d="M72 68 C78 72 80 80 70 85" stroke="#00d4ff" fill="none" stroke-width="1"/>
+                            <line x1="48" y1="30" x2="35" y2="65" stroke="#00d4ff" stroke-width="1.2"/>
+                            <line x1="72" y1="30" x2="85" y2="65" stroke="#00d4ff" stroke-width="1.2"/>
+                            <line x1="53" y1="85" x2="48" y2="145" stroke="#00d4ff" stroke-width="1.2"/>
+                            <line x1="67" y1="85" x2="72" y2="145" stroke="#00d4ff" stroke-width="1.2"/>
+                            <circle cx="48" cy="30" r="3" fill="rgba(0,188,230,0.3)" stroke="#00d4ff" stroke-width="0.5"/>
+                            <circle cx="72" cy="30" r="3" fill="rgba(0,188,230,0.3)" stroke="#00d4ff" stroke-width="0.5"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-white font-semibold text-sm sm:text-base">Skeletal Structure</h3>
+                    <p class="text-gray-500 text-xs mt-1">Posture & proportions</p>
+                </div>
+                <div class="bg-[#0a0a14] border border-blue-500/10 rounded-2xl p-4 sm:p-6 text-center">
+                    <div class="w-full h-32 sm:h-44 rounded-xl bg-gradient-to-b from-blue-900/20 to-transparent flex items-center justify-center mb-3 overflow-hidden">
+                        <svg viewBox="0 0 120 160" class="w-20 h-28 sm:w-24 sm:h-32 opacity-60">
+                            <path d="M60 20 C40 20 35 35 40 45 C45 55 55 55 60 55" stroke="#00d4ff" fill="none" stroke-width="1.2"/>
+                            <path d="M60 20 C80 20 85 35 80 45 C75 55 65 55 60 55" stroke="#00d4ff" fill="none" stroke-width="1.2"/>
+                            <line x1="60" y1="55" x2="60" y2="100" stroke="#00d4ff" stroke-width="1.5"/>
+                            <path d="M60 65 L40 80" stroke="#00bce6" stroke-width="0.8" opacity="0.6"/>
+                            <path d="M60 65 L80 80" stroke="#00bce6" stroke-width="0.8" opacity="0.6"/>
+                            <path d="M60 80 L35 100" stroke="#00bce6" stroke-width="0.8" opacity="0.6"/>
+                            <path d="M60 80 L85 100" stroke="#00bce6" stroke-width="0.8" opacity="0.6"/>
+                            <path d="M60 95 L45 120" stroke="#00bce6" stroke-width="0.8" opacity="0.4"/>
+                            <path d="M60 95 L75 120" stroke="#00bce6" stroke-width="0.8" opacity="0.4"/>
+                            <circle cx="40" cy="80" r="2" fill="#00d4ff" opacity="0.5"/>
+                            <circle cx="80" cy="80" r="2" fill="#00d4ff" opacity="0.5"/>
+                            <circle cx="35" cy="100" r="2" fill="#00d4ff" opacity="0.4"/>
+                            <circle cx="85" cy="100" r="2" fill="#00d4ff" opacity="0.4"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-white font-semibold text-sm sm:text-base">Neural Mapping</h3>
+                    <p class="text-gray-500 text-xs mt-1">Motor units & recruitment</p>
+                </div>
+            </div>
+        </section>
+
+        <div class="divider-glow"></div>
+
+        <!-- Features Section -->
+        <section id="features" class="py-20 px-4 sm:px-6">
+            <div class="max-w-6xl mx-auto">
+                <div class="text-center mb-14">
+                    <h2 class="text-3xl sm:text-4xl font-bold text-white mb-4">Science Meets Intelligence</h2>
+                    <p class="text-gray-400 max-w-xl mx-auto">Every analysis powered by peer-reviewed exercise physiology, biomechanics research, and neuromuscular science.</p>
+                </div>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="card-hover group">
+                        <div class="w-14 h-14 bg-blue-600/10 border border-blue-500/20 rounded-xl flex items-center justify-center mb-5">
+                            <svg class="w-7 h-7 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-white font-semibold text-lg mb-2 group-hover:text-blue-400 transition-colors">AI Chat Engine</h3>
+                        <p class="text-gray-500 text-sm leading-relaxed">Ask about moment arms, motor unit recruitment, calcium dynamics, torque production. Get biomechanically correct answers every time.</p>
+                    </div>
+                    <div class="card-hover group">
+                        <div class="w-14 h-14 bg-blue-600/10 border border-blue-500/20 rounded-xl flex items-center justify-center mb-5">
+                            <svg class="w-7 h-7 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-white font-semibold text-lg mb-2 group-hover:text-blue-400 transition-colors">Physique Analyzer</h3>
+                        <p class="text-gray-500 text-sm leading-relaxed">Upload a photo for AI-powered scoring across 7 scientific categories. Circular gauges, color-coded ratings, and structural breakdowns.</p>
+                    </div>
+                    <div class="card-hover group">
+                        <div class="w-14 h-14 bg-blue-600/10 border border-blue-500/20 rounded-xl flex items-center justify-center mb-5">
+                            <svg class="w-7 h-7 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-white font-semibold text-lg mb-2 group-hover:text-blue-400 transition-colors">Science Quizzes</h3>
+                        <p class="text-gray-500 text-sm leading-relaxed">Test your knowledge across anatomy, biomechanics, motor unit recruitment, exercise science, and recovery adaptation.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="divider-glow"></div>
+
+        <!-- Quiz Teaser Section -->
+        <section class="py-20 px-4 sm:px-6">
+            <div class="max-w-6xl mx-auto">
+                <div class="text-center mb-12">
+                    <span class="text-blue-400 text-sm font-medium uppercase tracking-wider">Knowledge Hub</span>
+                    <h2 class="text-3xl sm:text-4xl font-bold text-white mt-3 mb-4">Test Your Science Knowledge</h2>
+                    <p class="text-gray-400 max-w-xl mx-auto">Challenge yourself with quizzes built from peer-reviewed research</p>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div class="card-hover text-center cursor-default">
+                        <div class="w-12 h-12 mx-auto mb-3 bg-blue-600/10 border border-blue-500/20 rounded-xl flex items-center justify-center">
+                            <svg class="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342" />
+                            </svg>
+                        </div>
+                        <h3 class="text-white font-medium text-sm">Human Anatomy</h3>
+                        <p class="text-gray-600 text-xs mt-1">Origins, insertions, fiber types</p>
+                    </div>
+                    <div class="card-hover text-center cursor-default">
+                        <div class="w-12 h-12 mx-auto mb-3 bg-blue-600/10 border border-blue-500/20 rounded-xl flex items-center justify-center">
+                            <svg class="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-white font-medium text-sm">Muscle Physiology</h3>
+                        <p class="text-gray-600 text-xs mt-1">Contraction, calcium, sliding filament</p>
+                    </div>
+                    <div class="card-hover text-center cursor-default">
+                        <div class="w-12 h-12 mx-auto mb-3 bg-blue-600/10 border border-blue-500/20 rounded-xl flex items-center justify-center">
+                            <svg class="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5" />
+                            </svg>
+                        </div>
+                        <h3 class="text-white font-medium text-sm">Biomechanics</h3>
+                        <p class="text-gray-600 text-xs mt-1">Moment arms, torque, leverages</p>
+                    </div>
+                    <div class="card-hover text-center cursor-default">
+                        <div class="w-12 h-12 mx-auto mb-3 bg-blue-600/10 border border-blue-500/20 rounded-xl flex items-center justify-center">
+                            <svg class="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-white font-medium text-sm">Exercise Science</h3>
+                        <p class="text-gray-600 text-xs mt-1">Training principles & methodology</p>
+                    </div>
+                    <div class="card-hover text-center cursor-default">
+                        <div class="w-12 h-12 mx-auto mb-3 bg-blue-600/10 border border-blue-500/20 rounded-xl flex items-center justify-center">
+                            <svg class="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-white font-medium text-sm">Nervous System</h3>
+                        <p class="text-gray-600 text-xs mt-1">Motor unit recruitment & MUR</p>
+                    </div>
+                    <div class="card-hover text-center cursor-default">
+                        <div class="w-12 h-12 mx-auto mb-3 bg-blue-600/10 border border-blue-500/20 rounded-xl flex items-center justify-center">
+                            <svg class="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182" />
+                            </svg>
+                        </div>
+                        <h3 class="text-white font-medium text-sm">Recovery & Adaptation</h3>
+                        <p class="text-gray-600 text-xs mt-1">Sleep, supercompensation, hormones</p>
+                    </div>
+                </div>
+                <div class="text-center mt-8">
+                    <a href="/signup" class="nav-link btn btn-outline no-underline">
+                        Sign Up to Take Quizzes
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <div class="divider-glow"></div>
+
+        <!-- Physique Analyzer Teaser -->
+        <section class="py-20 px-4 sm:px-6">
+            <div class="max-w-5xl mx-auto">
+                <div class="grid md:grid-cols-2 gap-10 items-center">
+                    <div>
+                        <span class="text-blue-400 text-sm font-medium uppercase tracking-wider">AI-Powered</span>
+                        <h2 class="text-3xl sm:text-4xl font-bold text-white mt-3 mb-4">Physique Analysis</h2>
+                        <p class="text-gray-400 leading-relaxed mb-6">
+                            Upload a photo and receive AI-powered analysis across 7 scientific categories. Get circular gauge scores, structural breakdowns, and personalized recommendations.
+                        </p>
+                        <div class="space-y-3 mb-8">
+                            <div class="flex items-center gap-3 text-sm text-gray-300">
+                                <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                                Muscle Mass & Symmetry Scoring
+                            </div>
+                            <div class="flex items-center gap-3 text-sm text-gray-300">
+                                <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+                                Posture & Proportions Analysis
+                            </div>
+                            <div class="flex items-center gap-3 text-sm text-gray-300">
+                                <div class="w-2 h-2 rounded-full bg-blue-400"></div>
+                                Conditioning & Aesthetic Balance
+                            </div>
+                            <div class="flex items-center gap-3 text-sm text-gray-300">
+                                <div class="w-2 h-2 rounded-full bg-blue-300"></div>
+                                Overall Potential Score (0-100)
+                            </div>
+                        </div>
+                        <div class="bg-[#0a0a14] border border-blue-500/20 rounded-xl p-4">
+                            <div class="flex items-start gap-3">
+                                <div class="w-5 h-5 mt-0.5 flex-shrink-0 border border-blue-500/40 rounded flex items-center justify-center">
+                                    <svg class="w-3 h-3 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                                </div>
+                                <p class="text-sm text-gray-400">
+                                    <span class="text-white font-medium">I consent</span> — Your image is analyzed by AI for educational purposes only. Photos are not stored permanently. Privacy-first approach.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="bg-[#0a0a14] border border-blue-500/10 rounded-2xl p-6">
+                            <div class="flex items-center gap-2 mb-6">
+                                <div class="w-3 h-3 rounded-full bg-red-500/50"></div>
+                                <div class="w-3 h-3 rounded-full bg-yellow-500/50"></div>
+                                <div class="w-3 h-3 rounded-full bg-green-500/50"></div>
+                                <span class="text-xs text-gray-600 ml-2">Analysis Results</span>
+                            </div>
+                            <div class="flex justify-center gap-6 mb-6">
+                                <div class="text-center">
+                                    <svg width="70" height="70" class="transform -rotate-90">
+                                        <circle cx="35" cy="35" r="28" fill="none" stroke="rgba(34,197,94,0.15)" stroke-width="5" />
+                                        <circle cx="35" cy="35" r="28" fill="none" stroke="#22c55e" stroke-width="5" stroke-linecap="round" stroke-dasharray="175.9" stroke-dashoffset="28.1" />
+                                    </svg>
+                                    <div class="text-xs text-gray-400 mt-1">Mass</div>
+                                </div>
+                                <div class="text-center">
+                                    <svg width="70" height="70" class="transform -rotate-90">
+                                        <circle cx="35" cy="35" r="28" fill="none" stroke="rgba(0,212,255,0.15)" stroke-width="5" />
+                                        <circle cx="35" cy="35" r="28" fill="none" stroke="#00d4ff" stroke-width="5" stroke-linecap="round" stroke-dasharray="175.9" stroke-dashoffset="52.8" />
+                                    </svg>
+                                    <div class="text-xs text-gray-400 mt-1">Symmetry</div>
+                                </div>
+                                <div class="text-center">
+                                    <svg width="70" height="70" class="transform -rotate-90">
+                                        <circle cx="35" cy="35" r="28" fill="none" stroke="rgba(245,158,11,0.15)" stroke-width="5" />
+                                        <circle cx="35" cy="35" r="28" fill="none" stroke="#f59e0b" stroke-width="5" stroke-linecap="round" stroke-dasharray="175.9" stroke-dashoffset="70.4" />
+                                    </svg>
+                                    <div class="text-xs text-gray-400 mt-1">Conditioning</div>
+                                </div>
+                            </div>
+                            <div class="text-center">
+                                <div class="relative w-24 h-24 mx-auto">
+                                    <svg width="96" height="96" class="transform -rotate-90">
+                                        <circle cx="48" cy="48" r="40" fill="none" stroke="rgba(0,212,255,0.1)" stroke-width="6" />
+                                        <circle cx="48" cy="48" r="40" fill="none" stroke="#00bce6" stroke-width="6" stroke-linecap="round" stroke-dasharray="251.3" stroke-dashoffset="50.3" />
+                                    </svg>
+                                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                        <span class="text-2xl font-bold text-blue-400">80</span>
+                                        <span class="text-[10px] text-gray-500">/100</span>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-2">Overall Potential</p>
+                            </div>
+                            <div class="mt-6 pt-4 border-t border-blue-500/10">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="badge-premium">Premium</span>
+                                    <span class="text-xs text-gray-400">Ask Questions About Your Physique</span>
+                                </div>
+                                <p class="text-xs text-gray-500">Premium users can ask follow-up questions about their analysis and get personalized biomechanics recommendations.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="divider-glow"></div>
+
+        <!-- Science Topics Grid -->
+        <section class="py-20 px-4 sm:px-6">
+            <div class="max-w-6xl mx-auto">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl sm:text-4xl font-bold text-white mb-4">Complete Scientific Coverage</h2>
+                    <p class="text-gray-400">The AI covers every domain of human performance science</p>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div class="p-5 bg-[#0a0a14] border border-blue-500/10 rounded-xl">
+                        <h3 class="text-white font-medium text-sm mb-1">Muscular System</h3>
+                        <p class="text-gray-600 text-xs">Origins, insertions, fiber types, hypertrophy mechanisms</p>
+                    </div>
+                    <div class="p-5 bg-[#0a0a14] border border-blue-500/10 rounded-xl">
+                        <h3 class="text-white font-medium text-sm mb-1">Neuromuscular</h3>
+                        <p class="text-gray-600 text-xs">Motor unit recruitment, size principle, rate coding</p>
+                    </div>
+                    <div class="p-5 bg-[#0a0a14] border border-blue-500/10 rounded-xl">
+                        <h3 class="text-white font-medium text-sm mb-1">Biomechanics</h3>
+                        <p class="text-gray-600 text-xs">Moment arms, torque, leverages, force vectors</p>
+                    </div>
+                    <div class="p-5 bg-[#0a0a14] border border-blue-500/10 rounded-xl">
+                        <h3 class="text-white font-medium text-sm mb-1">Cardiovascular</h3>
+                        <p class="text-gray-600 text-xs">Heart, VO2max, hemodynamics, exercise response</p>
+                    </div>
+                    <div class="p-5 bg-[#0a0a14] border border-blue-500/10 rounded-xl">
+                        <h3 class="text-white font-medium text-sm mb-1">Endocrine</h3>
+                        <p class="text-gray-600 text-xs">Testosterone, cortisol, GH, insulin, adaptation</p>
+                    </div>
+                    <div class="p-5 bg-[#0a0a14] border border-blue-500/10 rounded-xl">
+                        <h3 class="text-white font-medium text-sm mb-1">Recovery</h3>
+                        <p class="text-gray-600 text-xs">Sleep stages, protein synthesis, supercompensation</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="divider-glow"></div>
+
+        <!-- Pricing -->
+        <section class="py-20 px-4 sm:px-6">
+            <div class="max-w-4xl mx-auto">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl sm:text-4xl font-bold text-white mb-3">Simple Pricing</h2>
+                    <p class="text-gray-400">Start free, upgrade when you're ready for the full experience</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+                    <div class="card">
+                        <h3 class="text-white font-bold text-lg mb-1">Free</h3>
+                        <p class="text-3xl font-bold text-white mb-5">$0 <span class="text-sm font-normal text-gray-600">/month</span></p>
+                        <ul class="space-y-3 text-sm text-gray-400">
+                            <li class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-gray-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                15 AI messages/month
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-gray-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                Partial physique analysis
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-gray-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                Basic ratings
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="relative overflow-hidden card border-blue-500/30">
+                        <div class="absolute top-0 right-0 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">RECOMMENDED</div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <h3 class="text-white font-bold text-lg">Premium</h3>
+                            <span class="badge-premium">Best Value</span>
+                        </div>
+                        <p class="text-3xl font-bold text-white mb-5">$14.99 <span class="text-sm font-normal text-gray-500">/month</span></p>
+                        <ul class="space-y-3 text-sm text-gray-300">
+                            <li class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-blue-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                Unlimited AI messages
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-blue-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                Full physique analysis (7 categories)
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-blue-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                All science quizzes unlocked
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-blue-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                Ask questions about your physique
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-blue-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                Advanced biomechanics breakdowns
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <section class="py-20 px-4 sm:px-6 relative">
+            <div class="absolute inset-0 bg-gradient-to-t from-blue-600/5 to-transparent pointer-events-none"></div>
+            <div class="max-w-2xl mx-auto text-center relative z-10">
+                <h2 class="text-3xl sm:text-4xl font-bold text-white mb-4">Ready to Decode Your Potential?</h2>
+                <p class="text-gray-400 mb-8">Join Myogen and access science-based training intelligence backed by real research.</p>
+                <a href="/signup" class="nav-link btn btn-primary btn-lg no-underline">Create Free Account</a>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="border-t border-blue-500/10 py-8 px-4 sm:px-6">
+            <div class="max-w-6xl mx-auto">
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="flex items-center gap-2.5">
+                        <svg width="24" height="24" viewBox="0 0 40 40" fill="none">
+                            <path d="M13 4 C13 4, 27 9, 27 15 C27 21, 13 21, 13 27 C13 33, 27 33, 27 36" stroke="#00d4ff" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                            <path d="M27 4 C27 4, 13 9, 13 15 C13 21, 27 21, 27 27 C27 33, 13 33, 13 36" stroke="#33e0ff" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.5"/>
+                        </svg>
+                        <span class="text-gray-400 text-sm font-medium">MYOGEN</span>
+                    </div>
+                    <p class="text-xs text-gray-600 text-center">
+                        Educational purposes only. Not medical advice. Consult a healthcare provider for personal health decisions.
+                    </p>
+                </div>
+            </div>
+        </footer>
+    </div>
 </Layout>

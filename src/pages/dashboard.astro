@@ -1,0 +1,9 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/app/Navigation';
+import DashboardApp from '../components/app/DashboardApp';
+---
+<Layout title="Dashboard">
+    <Navigation activePage="/dashboard" client:load />
+    <DashboardApp client:load />
+</Layout>

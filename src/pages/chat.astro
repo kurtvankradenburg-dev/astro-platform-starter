@@ -1,0 +1,9 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/app/Navigation';
+import ChatApp from '../components/app/ChatApp';
+---
+<Layout title="AI Chat">
+    <Navigation activePage="/chat" client:load />
+    <ChatApp client:load />
+</Layout>
