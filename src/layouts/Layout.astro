@@ -21,6 +21,8 @@ const { title } = Astro.props;
         <meta name="generator" content={Astro.generator} />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="preload" as="font" type="font/woff2" href={interWoff2} crossorigin />
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#00eaff" />
     </head>
     <body class="antialiased text-white bg-complementary">
         <div class="flex flex-col min-h-screen px-6 bg-noise sm:px-12">
@@ -30,5 +32,43 @@ const { title } = Astro.props;
                 <Footer />
             </div>
         </div>
+        <!-- PWA Install Button -->
+        <button
+            id="installBtn"
+            style="display:none;position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);padding:0.875rem 2rem;background:linear-gradient(135deg,#00eaff,#0077b6);color:#000;font-weight:700;font-size:1rem;border:none;border-radius:9999px;cursor:pointer;box-shadow:0 4px 24px rgba(0,234,255,0.35);z-index:9999;transition:transform 0.2s,box-shadow 0.2s;"
+            onmouseover="this.style.transform='translateX(-50%) scale(1.05)';this.style.boxShadow='0 6px 32px rgba(0,234,255,0.5)'"
+            onmouseout="this.style.transform='translateX(-50%) scale(1)';this.style.boxShadow='0 4px 24px rgba(0,234,255,0.35)'"
+        >
+            Install Myogen App
+        </button>
+
+        <!-- Service Worker Registration & PWA Install Prompt -->
+        <script is:inline>
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/service-worker.js');
+            }
+
+            let deferredPrompt;
+            const installBtn = document.getElementById('installBtn');
+
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                installBtn.style.display = 'block';
+            });
+
+            installBtn.addEventListener('click', async () => {
+                if (!deferredPrompt) return;
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+                installBtn.style.display = 'none';
+            });
+
+            window.addEventListener('appinstalled', () => {
+                installBtn.style.display = 'none';
+                deferredPrompt = null;
+            });
+        </script>
     </body>
 </html>
