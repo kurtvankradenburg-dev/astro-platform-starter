@@ -64,6 +64,28 @@ function AboutPage() {
                     <p className="text-sm text-text-light">Eco City uses modern web technology including AI-powered assistants, real-time communication, and progressive web app features to deliver a fast, reliable experience on any device.</p>
                 </div>
             </div>
+
+            <div className="card mt-8">
+                <div className="flex items-center gap-2 mb-4">
+                    <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                        <HeartIcon size={20} className="text-green-600" />
+                    </div>
+                    <div>
+                        <h3 className="font-bold">The Team</h3>
+                        <p className="text-xs text-text-light">The people behind Eco City</p>
+                    </div>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    {['Kurt van Kradenburg', 'Anjanette Venter', 'Ninke Hough', 'Ryan Cronje'].map(name => (
+                        <div key={name} className="text-center">
+                            <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-2 text-white font-bold text-sm">
+                                {name.split(' ')[0][0]}{name.split(' ').slice(-1)[0][0]}
+                            </div>
+                            <p className="text-sm font-medium">{name}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
         </div>
     );
 }
@@ -177,6 +199,9 @@ function FeaturesPage() {
                     </div>
                 ))}
             </div>
+            <p className="text-center text-xs text-text-light mt-8 opacity-50">
+                Built by Kurt van Kradenburg, Anjanette Venter, Ninke Hough & Ryan Cronje
+            </p>
         </div>
     );
 }

@@ -157,6 +157,10 @@ export default function SettingsPage() {
                 </button>
                 <button onClick={logout} className="btn btn-danger">Sign Out</button>
             </div>
+
+            <p className="text-center text-xs text-text-light mt-6 opacity-60">
+                Made by Kurt van Kradenburg, Anjanette Venter, Ninke Hough & Ryan Cronje
+            </p>
         </div>
     );
 }
