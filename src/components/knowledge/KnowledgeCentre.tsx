@@ -50,6 +50,21 @@ export default function KnowledgeCentre() {
         setAiLoading(false);
     };
 
+    const formatAIText = (text: string) => {
+        const cleaned = text
+            .replace(/^#{1,6}\s*/gm, '')
+            .replace(/\*{1,3}([^*]+)\*{1,3}/g, '$1')
+            .replace(/^[\-\*]\s+/gm, '')
+            .replace(/^>\s*/gm, '')
+            .replace(/`([^`]+)`/g, '$1');
+        const paragraphs = cleaned.split(/\n\s*\n|\n(?=[A-Z])/).map(p => p.trim()).filter(Boolean);
+        if (paragraphs.length <= 1) {
+            const lines = cleaned.split('\n').map(l => l.trim()).filter(Boolean);
+            return lines.map((line, i) => <p key={i} className="mb-1 last:mb-0">{line}</p>);
+        }
+        return paragraphs.map((para, i) => <p key={i} className="mb-1 last:mb-0">{para}</p>);
+    };
+
     if (selectedArticle) {
         return (
             <div className="p-4 sm:p-6 max-w-4xl mx-auto">
@@ -89,14 +104,14 @@ export default function KnowledgeCentre() {
                         )}
                         {aiMessages.map((msg, i) => (
                             <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                <div className={`max-w-[80%] px-3 py-2 rounded-xl text-sm ${msg.role === 'user' ? 'bg-primary text-white' : 'bg-gray-100 text-text'}`}>
-                                    {msg.content}
+                                <div className={`max-w-[80%] px-3 py-2 rounded-xl text-sm ${msg.role === 'user' ? 'bg-primary text-white' : 'bg-surface-dark text-text'}`}>
+                                    {msg.role === 'assistant' ? formatAIText(msg.content) : msg.content}
                                 </div>
                             </div>
                         ))}
                         {aiLoading && (
                             <div className="flex justify-start">
-                                <div className="bg-gray-100 px-3 py-2 rounded-xl text-sm text-text-muted">Thinking...</div>
+                                <div className="bg-surface-dark px-3 py-2 rounded-xl text-sm text-text-muted">Thinking...</div>
                             </div>
                         )}
                     </div>
@@ -127,7 +142,7 @@ export default function KnowledgeCentre() {
                     <button
                         key={cat}
                         onClick={() => setSelectedCategory(cat)}
-                        className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${selectedCategory === cat ? 'bg-primary text-white' : 'bg-gray-100 text-text-light hover:bg-gray-200'}`}
+                        className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${selectedCategory === cat ? 'bg-primary text-white' : 'bg-surface-dark text-text-light hover:bg-border'}`}
                     >{cat}</button>
                 ))}
             </div>

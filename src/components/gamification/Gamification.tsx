@@ -66,8 +66,8 @@ export default function Gamification() {
             <h2 className="text-lg font-bold mb-3">Streak Rewards</h2>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
                 {streakRewards.map(s => (
-                    <div key={s.days} className={`card !p-4 text-center ${s.earned ? 'border-primary/30 bg-green-50' : ''}`}>
-                        <FlameIcon size={24} className={`mx-auto mb-2 ${s.earned ? 'text-orange-500' : 'text-gray-300'}`} />
+                    <div key={s.days} className={`card !p-4 text-center ${s.earned ? 'border-primary/30 bg-primary/5' : ''}`}>
+                        <FlameIcon size={24} className={`mx-auto mb-2 ${s.earned ? 'text-orange-500' : 'text-text-muted'}`} />
                         <p className="text-sm font-bold">{s.label}</p>
                         <p className="text-xs text-text-muted">+{s.points} pts</p>
                         {s.earned && <span className="badge badge-primary mt-1 text-[10px]">Earned!</span>}
@@ -96,9 +96,9 @@ export default function Gamification() {
             {/* Leaderboard */}
             <div className="flex items-center justify-between mb-3">
                 <h2 className="text-lg font-bold">Town Leaderboard</h2>
-                <div className="flex gap-1 bg-gray-100 rounded-lg p-0.5">
-                    <button onClick={() => setPeriod('weekly')} className={`px-3 py-1 rounded-md text-xs font-medium ${period === 'weekly' ? 'bg-white shadow' : ''}`}>Weekly</button>
-                    <button onClick={() => setPeriod('monthly')} className={`px-3 py-1 rounded-md text-xs font-medium ${period === 'monthly' ? 'bg-white shadow' : ''}`}>Monthly</button>
+                <div className="flex gap-1 bg-surface-dark rounded-lg p-0.5">
+                    <button onClick={() => setPeriod('weekly')} className={`px-3 py-1 rounded-md text-xs font-medium ${period === 'weekly' ? 'bg-surface-card shadow text-text' : 'text-text-light'}`}>Weekly</button>
+                    <button onClick={() => setPeriod('monthly')} className={`px-3 py-1 rounded-md text-xs font-medium ${period === 'monthly' ? 'bg-surface-card shadow text-text' : 'text-text-light'}`}>Monthly</button>
                 </div>
             </div>
 
@@ -106,7 +106,7 @@ export default function Gamification() {
                 <div className="divide-y divide-border">
                     {leaderboardData.map(entry => (
                         <div key={entry.rank} className={`flex items-center gap-3 p-3 ${entry.name === user?.name ? 'bg-primary/5' : ''}`}>
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-bold ${entry.rank <= 3 ? `${medals[entry.rank]} text-white` : 'bg-gray-100 text-text-light'}`}>
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-bold ${entry.rank <= 3 ? `${medals[entry.rank]} text-white` : 'bg-surface-dark text-text-light'}`}>
                                 {entry.rank}
                             </div>
                             <div className="flex-1 min-w-0">

@@ -80,7 +80,7 @@ export default function ChatSystem() {
     return (
         <div className="flex h-[calc(100vh-3.5rem)]">
             {/* Channel sidebar */}
-            <div className={`${showChannels ? 'block' : 'hidden'} sm:block w-full sm:w-56 border-r border-border bg-white flex-col shrink-0 flex`}>
+            <div className={`${showChannels ? 'block' : 'hidden'} sm:block w-full sm:w-56 border-r border-border bg-surface-card flex-col shrink-0 flex`}>
                 <div className="p-4 border-b border-border">
                     <h3 className="font-bold text-sm">Channels</h3>
                 </div>
@@ -89,7 +89,7 @@ export default function ChatSystem() {
                         <button
                             key={ch.id}
                             onClick={() => { setActiveChannel(ch.id); setShowChannels(false); }}
-                            className={`w-full text-left px-4 py-3 flex items-center gap-2 hover:bg-gray-50 transition-colors ${activeChannel === ch.id ? 'bg-primary/5 border-l-2 border-primary' : ''}`}
+                            className={`w-full text-left px-4 py-3 flex items-center gap-2 hover:bg-surface-dark transition-colors ${activeChannel === ch.id ? 'bg-primary/5 border-l-2 border-primary' : ''}`}
                         >
                             <HashIcon size={14} className="text-text-muted shrink-0" />
                             <div>
@@ -104,8 +104,8 @@ export default function ChatSystem() {
             {/* Chat area */}
             <div className={`${showChannels ? 'hidden sm:flex' : 'flex'} flex-1 flex-col min-w-0`}>
                 {/* Header */}
-                <div className="p-3 border-b border-border flex items-center gap-3 bg-white">
-                    <button onClick={() => setShowChannels(!showChannels)} className="sm:hidden p-1.5 rounded-lg hover:bg-gray-100">
+                <div className="p-3 border-b border-border flex items-center gap-3 bg-surface-card">
+                    <button onClick={() => setShowChannels(!showChannels)} className="sm:hidden p-1.5 rounded-lg hover:bg-surface-dark">
                         <HashIcon size={18} />
                     </button>
                     <HashIcon size={18} className="text-text-muted hidden sm:block" />
@@ -123,11 +123,11 @@ export default function ChatSystem() {
                         return (
                             <div key={msg.id} className={`group ${isOwn ? 'ml-auto' : ''} max-w-[85%] sm:max-w-[70%]`}>
                                 {replyMsg && (
-                                    <div className="text-[10px] text-text-muted mb-1 pl-3 border-l-2 border-gray-200">
+                                    <div className="text-[10px] text-text-muted mb-1 pl-3 border-l-2 border-border">
                                         Replying to {replyMsg.user}: {replyMsg.content.slice(0, 50)}...
                                     </div>
                                 )}
-                                <div className={`${isOwn ? 'bg-primary text-white' : 'bg-white border border-border'} px-4 py-2.5 rounded-2xl ${isOwn ? 'rounded-br-md' : 'rounded-bl-md'} shadow-sm`}>
+                                <div className={`${isOwn ? 'bg-primary text-white' : 'bg-surface-card border border-border'} px-4 py-2.5 rounded-2xl ${isOwn ? 'rounded-br-md' : 'rounded-bl-md'} shadow-sm`}>
                                     {!isOwn && (
                                         <p className="text-xs font-semibold mb-1" style={{ color: isOwn ? 'white' : stringToColor(msg.user) }}>{msg.user}</p>
                                     )}
@@ -147,14 +147,14 @@ export default function ChatSystem() {
 
                 {/* Reply indicator */}
                 {replyTo && (
-                    <div className="px-4 py-2 bg-gray-50 border-t border-border flex items-center gap-2">
+                    <div className="px-4 py-2 bg-surface-dark border-t border-border flex items-center gap-2">
                         <span className="text-xs text-text-light flex-1">Replying to <strong>{replyTo.user}</strong></span>
                         <button onClick={() => setReplyTo(null)} className="text-xs text-text-muted hover:text-red-500">Cancel</button>
                     </div>
                 )}
 
                 {/* Input */}
-                <div className="p-3 border-t border-border bg-white">
+                <div className="p-3 border-t border-border bg-surface-card">
                     <div className="flex gap-2">
                         <input
                             value={input}

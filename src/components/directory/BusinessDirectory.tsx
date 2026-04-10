@@ -31,7 +31,7 @@ export default function BusinessDirectory() {
         return (
             <div className="flex items-center gap-0.5">
                 {[1, 2, 3, 4, 5].map(s => (
-                    <StarIcon key={s} size={12} className={s <= Math.round(rating) ? 'text-amber-400' : 'text-gray-200'} />
+                    <StarIcon key={s} size={12} className={s <= Math.round(rating) ? 'text-amber-400' : 'text-text-muted/30'} />
                 ))}
                 <span className="text-xs text-text-light ml-1">{rating}</span>
             </div>
@@ -55,7 +55,7 @@ export default function BusinessDirectory() {
                     <button
                         key={cat}
                         onClick={() => setSelectedCategory(cat)}
-                        className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${selectedCategory === cat ? 'bg-primary text-white' : 'bg-gray-100 text-text-light hover:bg-gray-200'}`}
+                        className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${selectedCategory === cat ? 'bg-primary text-white' : 'bg-surface-dark text-text-light hover:bg-border'}`}
                     >{cat}</button>
                 ))}
             </div>
@@ -65,7 +65,7 @@ export default function BusinessDirectory() {
             <div className="space-y-3">
                 {filtered.map(biz => (
                     <div key={biz.id} className="card flex gap-4">
-                        <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center shrink-0">
+                        <div className="w-12 h-12 bg-indigo-500/10 rounded-lg flex items-center justify-center shrink-0">
                             <StoreIcon size={20} className="text-indigo-600" />
                         </div>
                         <div className="flex-1 min-w-0">

@@ -110,7 +110,7 @@ export default function SettingsPage() {
                     </div>
                     <button
                         onClick={toggleTheme}
-                        className={`relative w-12 h-6 rounded-full transition-colors ${theme === 'dark' ? 'bg-primary' : 'bg-gray-300'}`}
+                        className={`relative w-12 h-6 rounded-full transition-colors ${theme === 'dark' ? 'bg-primary' : 'bg-border'}`}
                     >
                         <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${theme === 'dark' ? 'translate-x-6' : 'translate-x-0.5'}`} />
                     </button>
@@ -130,7 +130,7 @@ export default function SettingsPage() {
                     </div>
                     <button
                         onClick={requestNotificationPermission}
-                        className={`relative w-12 h-6 rounded-full transition-colors ${notificationsEnabled ? 'bg-primary' : 'bg-gray-300'}`}
+                        className={`relative w-12 h-6 rounded-full transition-colors ${notificationsEnabled ? 'bg-primary' : 'bg-border'}`}
                     >
                         <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${notificationsEnabled ? 'translate-x-6' : 'translate-x-0.5'}`} />
                     </button>

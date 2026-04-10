@@ -57,14 +57,14 @@ export default function AuthScreen() {
                 </div>
 
                 <div className="card fade-in" style={{ animationDelay: '0.1s' }}>
-                    <div className="flex mb-6 bg-gray-100 dark:bg-[#132016] rounded-lg p-1">
+                    <div className="flex mb-6 bg-surface-dark rounded-lg p-1">
                         <button
                             onClick={() => setIsLogin(true)}
-                            className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${isLogin ? 'bg-white dark:bg-[#1e3a24] shadow text-gray-900 dark:text-white' : 'text-gray-500'}`}
+                            className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${isLogin ? 'bg-surface-card shadow text-text' : 'text-text-light'}`}
                         >Sign In</button>
                         <button
                             onClick={() => setIsLogin(false)}
-                            className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${!isLogin ? 'bg-white dark:bg-[#1e3a24] shadow text-gray-900 dark:text-white' : 'text-gray-500'}`}
+                            className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${!isLogin ? 'bg-surface-card shadow text-text' : 'text-text-light'}`}
                         >Sign Up</button>
                     </div>
 
@@ -164,7 +164,7 @@ export default function AuthScreen() {
                             className={`btn w-full transition-all ${
                                 (isLogin ? isLoginValid : isSignupValid) && !loading
                                     ? 'btn-primary'
-                                    : 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed hover:transform-none hover:shadow-none'
+                                    : 'bg-border text-text-muted cursor-not-allowed hover:transform-none hover:shadow-none'
                             }`}
                         >
                             {loading ? 'Please wait...' : isLogin ? 'Sign In' : 'Create Account'}

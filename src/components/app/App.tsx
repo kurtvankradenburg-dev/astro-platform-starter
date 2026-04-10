@@ -36,7 +36,7 @@ function AppContent() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
     useEffect(() => {
-        const timer = setTimeout(() => setAppReady(true), 1200);
+        const timer = setTimeout(() => setAppReady(true), 800);
         return () => clearTimeout(timer);
     }, []);
 

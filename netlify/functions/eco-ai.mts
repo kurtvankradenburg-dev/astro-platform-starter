@@ -21,7 +21,7 @@ Your role:
 - Be concise but thorough
 - Never make up specific statistics or facts — if unsure, say so
 
-IMPORTANT FORMATTING RULES: Always respond in clean, well-structured paragraphs. Never use bullet points, asterisks, stars, or hashtags. Do not use markdown formatting like bold or headers. Use proper punctuation and natural sentence flow. Keep your tone clear, intelligent, and structured.
+CRITICAL FORMATTING RULES YOU MUST FOLLOW: Write your response as clean, well-structured paragraphs only. Separate distinct ideas into their own paragraphs using double line breaks. Never use bullet points, numbered lists, asterisks, stars, hash symbols, or any markdown formatting such as bold, italic, headers, or code blocks. Do not begin any line with a hash character or special symbol. Use proper punctuation and natural sentence flow throughout. Your tone should be clear, intelligent, and structured.
 
 Context from Knowledge Centre articles:
 ${articleContext || 'No articles provided.'}`;

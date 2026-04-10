@@ -58,6 +58,22 @@ const mockStudySessions: StudySession[] = [
 
 export default function StudyHub() {
     const { user } = useAuth();
+
+    const formatAIText = (text: string) => {
+        const cleaned = text
+            .replace(/^#{1,6}\s*/gm, '')
+            .replace(/\*{1,3}([^*]+)\*{1,3}/g, '$1')
+            .replace(/^[\-\*]\s+/gm, '')
+            .replace(/^>\s*/gm, '')
+            .replace(/`([^`]+)`/g, '$1');
+        const paragraphs = cleaned.split(/\n\s*\n|\n(?=[A-Z])/).map((p: string) => p.trim()).filter(Boolean);
+        if (paragraphs.length <= 1) {
+            const lines = cleaned.split('\n').map((l: string) => l.trim()).filter(Boolean);
+            return lines.map((line: string, i: number) => <p key={i}>{line}</p>);
+        }
+        return paragraphs.map((para: string, i: number) => <p key={i}>{para}</p>);
+    };
+
     const [activeTab, setActiveTab] = useState<Tab>('upload');
     const [uploadText, setUploadText] = useState('');
     const [summary, setSummary] = useState('');
@@ -71,7 +87,7 @@ export default function StudyHub() {
     const [subjectFilter, setSubjectFilter] = useState('All');
     const [gradeFilter, setGradeFilter] = useState('All');
     const [classrooms, setClassrooms] = useState<ClassItem[]>([
-        { id: '1', name: 'Physical Sciences 12A', code: 'PHY12A', teacher: 'Mr. Nkosi', students: 32, notes: ['Newton\'s Laws Summary', 'Electrostatics Notes'], links: ['https://meet.google.com/abc-defg-hij'] },
+        { id: '1', name: 'Physical Sciences 12A', code: 'PHY12A', teacher: 'Mr. Nkosi', students: 32, notes: ['Newton\'s Laws Summary', 'Electrostatics Notes'], links: [] },
         { id: '2', name: 'Mathematics 12B', code: 'MAT12B', teacher: 'Mrs. Dlamini', students: 28, notes: ['Calculus Intro', 'Trigonometry Review'], links: [] },
     ]);
     const [joinCode, setJoinCode] = useState('');
@@ -271,20 +287,20 @@ export default function StudyHub() {
                     {summary && (
                         <div className="card border-primary/30">
                             <h3 className="font-bold mb-2">Summary</h3>
-                            <p className="text-sm text-text-light whitespace-pre-wrap">{summary}</p>
+                            <div className="text-sm text-text-light space-y-2">{formatAIText(summary)}</div>
                         </div>
                     )}
                     <div className="card">
                         <h3 className="font-bold mb-3">Explain This</h3>
                         <input value={explainText} onChange={e => setExplainText(e.target.value)} placeholder="Paste a concept or term to explain..." className="input mb-2" />
                         <button onClick={handleExplain} disabled={summaryLoading || !explainText.trim()} className="btn btn-outline btn-sm">Explain</button>
-                        {explainResult && <p className="text-sm text-text-light mt-3 whitespace-pre-wrap">{explainResult}</p>}
+                        {explainResult && <div className="text-sm text-text-light mt-3 space-y-2">{formatAIText(explainResult)}</div>}
                     </div>
                     <div className="card">
                         <h3 className="font-bold mb-3">Ask Questions About Your Content</h3>
                         <input value={askQuestion} onChange={e => setAskQuestion(e.target.value)} placeholder="Ask a question about your uploaded notes..." className="input mb-2" />
                         <button onClick={handleAsk} disabled={summaryLoading || !askQuestion.trim() || !uploadText.trim()} className="btn btn-outline btn-sm">Ask</button>
-                        {askAnswer && <p className="text-sm text-text-light mt-3 whitespace-pre-wrap">{askAnswer}</p>}
+                        {askAnswer && <div className="text-sm text-text-light mt-3 space-y-2">{formatAIText(askAnswer)}</div>}
                     </div>
                 </div>
             )}

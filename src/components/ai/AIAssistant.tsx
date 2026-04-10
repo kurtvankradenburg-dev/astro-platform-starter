@@ -17,6 +17,30 @@ interface Conversation {
 
 export default function AIAssistant() {
     const { user } = useAuth();
+
+    const formatAIResponse = (content: string) => {
+        // Strip markdown artifacts: hashtags at start of lines, asterisks for bold/italic, bullet points
+        const cleaned = content
+            .replace(/^#{1,6}\s*/gm, '')
+            .replace(/\*{1,3}([^*]+)\*{1,3}/g, '$1')
+            .replace(/^[\-\*]\s+/gm, '')
+            .replace(/^>\s*/gm, '')
+            .replace(/`([^`]+)`/g, '$1');
+
+        // Split into paragraphs by double newlines or single newlines that separate blocks
+        const paragraphs = cleaned.split(/\n\s*\n|\n(?=[A-Z])/).map(p => p.trim()).filter(Boolean);
+
+        if (paragraphs.length <= 1) {
+            // If it's a single block, split by single newlines for line breaks
+            const lines = cleaned.split('\n').map(l => l.trim()).filter(Boolean);
+            if (lines.length <= 1) {
+                return <p>{cleaned}</p>;
+            }
+            return lines.map((line, i) => <p key={i}>{line}</p>);
+        }
+        return paragraphs.map((para, i) => <p key={i}>{para}</p>);
+    };
+
     const [conversations, setConversations] = useState<Conversation[]>(() => {
         try {
             const stored = localStorage.getItem(`ecocity_ai_chats_${user?.id}`);
@@ -112,7 +136,7 @@ export default function AIAssistant() {
     return (
         <div className="flex h-[calc(100vh-3.5rem)]">
             {/* Sidebar / History */}
-            <div className={`${showHistory ? 'block' : 'hidden'} sm:block w-full sm:w-72 border-r border-border bg-white flex-col shrink-0 flex`}>
+            <div className={`${showHistory ? 'block' : 'hidden'} sm:block w-full sm:w-72 border-r border-border bg-surface-card flex-col shrink-0 flex`}>
                 <div className="p-3 border-b border-border">
                     <button onClick={newConversation} className="btn btn-primary w-full gap-2">
                         <PlusIcon size={16} />
@@ -127,7 +151,7 @@ export default function AIAssistant() {
                             {conversations.map(conv => (
                                 <div
                                     key={conv.id}
-                                    className={`flex items-center gap-2 p-3 cursor-pointer hover:bg-gray-50 ${activeConvId === conv.id ? 'bg-primary/5 border-l-2 border-primary' : ''}`}
+                                    className={`flex items-center gap-2 p-3 cursor-pointer hover:bg-surface-dark ${activeConvId === conv.id ? 'bg-primary/5 border-l-2 border-primary' : ''}`}
                                 >
                                     <div className="flex-1 min-w-0" onClick={() => { setActiveConvId(conv.id); setShowHistory(false); }}>
                                         <p className="text-sm font-medium truncate">{conv.title}</p>
@@ -146,8 +170,8 @@ export default function AIAssistant() {
             {/* Chat Area */}
             <div className={`${showHistory ? 'hidden sm:flex' : 'flex'} flex-1 flex-col min-w-0`}>
                 {/* Chat header */}
-                <div className="p-3 border-b border-border flex items-center gap-3 bg-white">
-                    <button onClick={() => setShowHistory(!showHistory)} className="sm:hidden p-1.5 rounded-lg hover:bg-gray-100">
+                <div className="p-3 border-b border-border flex items-center gap-3 bg-surface-card">
+                    <button onClick={() => setShowHistory(!showHistory)} className="sm:hidden p-1.5 rounded-lg hover:bg-surface-dark">
                         <ClockIcon size={18} />
                     </button>
                     <BotIcon size={20} className="text-primary" />
@@ -177,8 +201,14 @@ export default function AIAssistant() {
                     )}
                     {activeConv?.messages.map((msg, i) => (
                         <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`max-w-[85%] sm:max-w-[70%] ${msg.role === 'user' ? 'bg-primary text-white' : 'bg-white border border-border text-text'} px-4 py-3 rounded-2xl ${msg.role === 'user' ? 'rounded-br-md' : 'rounded-bl-md'} shadow-sm`}>
-                                <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                            <div className={`max-w-[85%] sm:max-w-[70%] ${msg.role === 'user' ? 'bg-primary text-white' : 'bg-surface-card border border-border text-text'} px-4 py-3 rounded-2xl ${msg.role === 'user' ? 'rounded-br-md' : 'rounded-bl-md'} shadow-sm`}>
+                                {msg.role === 'assistant' ? (
+                                    <div className="text-sm space-y-2">
+                                        {formatAIResponse(msg.content)}
+                                    </div>
+                                ) : (
+                                    <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                                )}
                                 <p className={`text-[10px] mt-1 ${msg.role === 'user' ? 'text-white/60' : 'text-text-muted'}`}>
                                     {new Date(msg.timestamp).toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' })}
                                 </p>
@@ -187,11 +217,11 @@ export default function AIAssistant() {
                     ))}
                     {loading && (
                         <div className="flex justify-start">
-                            <div className="bg-white border border-border px-4 py-3 rounded-2xl rounded-bl-md shadow-sm">
+                            <div className="bg-surface-card border border-border px-4 py-3 rounded-2xl rounded-bl-md shadow-sm">
                                 <div className="flex gap-1">
-                                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                                    <div className="w-2 h-2 bg-text-muted rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                                    <div className="w-2 h-2 bg-text-muted rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                                    <div className="w-2 h-2 bg-text-muted rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                                 </div>
                             </div>
                         </div>
@@ -200,7 +230,7 @@ export default function AIAssistant() {
                 </div>
 
                 {/* Input */}
-                <div className="p-3 border-t border-border bg-white">
+                <div className="p-3 border-t border-border bg-surface-card">
                     <div className="flex gap-2 max-w-4xl mx-auto">
                         <input
                             value={input}
