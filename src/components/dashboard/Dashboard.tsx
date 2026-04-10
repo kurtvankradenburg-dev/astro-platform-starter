@@ -3,7 +3,7 @@ import { useAuth } from '../auth/AuthContext';
 import type { Page } from '../app/App';
 import {
     FileIcon, AlertIcon, BookIcon, BotIcon, GraduationIcon, HeartIcon,
-    StoreIcon, ChatIcon, TrophyIcon, FlameIcon, LeafIcon, MapPinIcon
+    StoreIcon, ChatIcon, TrophyIcon, FlameIcon, LeafIcon, MapPinIcon, BriefcaseIcon
 } from '../ui/Icons';
 
 interface DashboardProps {
@@ -17,6 +17,7 @@ const quickActions: { page: Page; label: string; desc: string; icon: React.FC<an
     { page: 'ai-assistant', label: 'AI Assistant', desc: 'Chat with AI', icon: BotIcon, color: 'bg-purple-500' },
     { page: 'study', label: 'Study Hub', desc: 'Notes & past papers', icon: GraduationIcon, color: 'bg-amber-500' },
     { page: 'community', label: 'Community', desc: 'Aid & local deals', icon: HeartIcon, color: 'bg-pink-500' },
+    { page: 'jobs', label: 'Job Centre', desc: 'Find job opportunities', icon: BriefcaseIcon, color: 'bg-orange-500' },
     { page: 'directory', label: 'Local Services', desc: 'Find businesses', icon: StoreIcon, color: 'bg-indigo-500' },
     { page: 'chat', label: 'Chat', desc: 'Community chat', icon: ChatIcon, color: 'bg-teal-500' },
 ];

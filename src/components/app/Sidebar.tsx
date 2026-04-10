@@ -5,7 +5,7 @@ import type { Page } from './App';
 import {
     HomeIcon, BookIcon, BotIcon, GraduationIcon, HeartIcon, StoreIcon,
     ChatIcon, FileIcon, AlertIcon, TrophyIcon, SettingsIcon, LogOutIcon,
-    LeafIcon, ShieldIcon, InfoIcon, GlobeIcon, SunIcon, MoonIcon
+    LeafIcon, ShieldIcon, InfoIcon, GlobeIcon, SunIcon, MoonIcon, BriefcaseIcon
 } from '../ui/Icons';
 
 interface SidebarProps {
@@ -21,6 +21,7 @@ const navItems: { page: Page; label: string; icon: React.FC<any>; section?: stri
     { page: 'ai-assistant', label: 'AI Assistant', icon: BotIcon },
     { page: 'study', label: 'Study Hub', icon: GraduationIcon, section: 'Learning' },
     { page: 'community', label: 'Community Support', icon: HeartIcon, section: 'Community' },
+    { page: 'jobs', label: 'Job Centre', icon: BriefcaseIcon },
     { page: 'directory', label: 'Local Services', icon: StoreIcon },
     { page: 'chat', label: 'Chat', icon: ChatIcon },
     { page: 'gamification', label: 'Leaderboard', icon: TrophyIcon, section: 'Engagement' },

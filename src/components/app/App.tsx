@@ -15,11 +15,12 @@ const BusinessDirectory = lazy(() => import('../directory/BusinessDirectory'));
 const ChatSystem = lazy(() => import('../chat/ChatSystem'));
 const Reports = lazy(() => import('../reports/Reports'));
 const Alerts = lazy(() => import('../alerts/Alerts'));
+const JobCentre = lazy(() => import('../jobs/JobCentre'));
 const Gamification = lazy(() => import('../gamification/Gamification'));
 const SettingsPage = lazy(() => import('../settings/SettingsPage'));
 const LegalPages = lazy(() => import('../legal/LegalPages'));
 
-export type Page = 'dashboard' | 'knowledge' | 'ai-assistant' | 'study' | 'community' | 'directory' | 'chat' | 'reports' | 'alerts' | 'gamification' | 'settings' | 'terms' | 'privacy' | 'help' | 'about' | 'features';
+export type Page = 'dashboard' | 'knowledge' | 'ai-assistant' | 'study' | 'community' | 'directory' | 'chat' | 'reports' | 'alerts' | 'jobs' | 'gamification' | 'settings' | 'terms' | 'privacy' | 'help' | 'about' | 'features';
 
 function PageLoader() {
     return (
@@ -55,6 +56,7 @@ function AppContent() {
             case 'chat': return <Suspense fallback={<PageLoader />}><ChatSystem /></Suspense>;
             case 'reports': return <Suspense fallback={<PageLoader />}><Reports /></Suspense>;
             case 'alerts': return <Suspense fallback={<PageLoader />}><Alerts /></Suspense>;
+            case 'jobs': return <Suspense fallback={<PageLoader />}><JobCentre /></Suspense>;
             case 'gamification': return <Suspense fallback={<PageLoader />}><Gamification /></Suspense>;
             case 'settings': return <Suspense fallback={<PageLoader />}><SettingsPage /></Suspense>;
             case 'terms': case 'privacy': case 'help': case 'about': case 'features':
