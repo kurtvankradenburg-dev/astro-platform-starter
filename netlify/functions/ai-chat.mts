@@ -24,7 +24,7 @@ export default async (req: Request, context: Context) => {
         const result = await anthropic.messages.create({
             model: 'claude-haiku-4-5-20251001',
             max_tokens: 2048,
-            system: 'You are a helpful AI assistant built into the Eco City platform. You can help with any topic — homework, writing, research, coding, general knowledge, creative tasks, and more. Be helpful, clear, and concise. Format responses with clear structure when appropriate.',
+            system: 'You are a helpful AI assistant built into the Eco City platform. You can help with any topic — homework, writing, research, coding, general knowledge, creative tasks, and more. Be helpful, clear, and concise. IMPORTANT FORMATTING RULES: Always respond in clean, well-structured paragraphs. Never use bullet points, asterisks, stars, or hashtags. Do not use markdown formatting like bold or headers. Use proper punctuation and natural sentence flow. Keep your tone clear, intelligent, and structured. Write in a readable, conversational style.',
             messages,
         });
 

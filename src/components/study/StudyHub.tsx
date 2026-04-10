@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useAuth } from '../auth/AuthContext';
-import { GraduationIcon, UploadIcon, BookIcon, FileIcon, SearchIcon, FilterIcon, DownloadIcon, PlusIcon, SendIcon, RefreshIcon, TrashIcon, CheckIcon, XIcon, LinkIcon, ChatIcon, UserIcon } from '../ui/Icons';
+import { GraduationIcon, UploadIcon, BookIcon, FileIcon, SearchIcon, FilterIcon, DownloadIcon, PlusIcon, SendIcon, RefreshIcon, TrashIcon, CheckIcon, XIcon, LinkIcon, ChatIcon, UserIcon, ImageIcon, BarChartIcon, FlameIcon } from '../ui/Icons';
 
-type Tab = 'upload' | 'flashcards' | 'papers' | 'classroom';
+type Tab = 'upload' | 'flashcards' | 'papers' | 'classroom' | 'performance';
 
 interface FlashCard {
     id: string;
@@ -21,6 +21,12 @@ interface ClassItem {
     links: string[];
 }
 
+interface StudySession {
+    date: string;
+    minutes: number;
+    topic: string;
+}
+
 const pastPapers = [
     { id: 1, subject: 'Mathematics', grade: 'Grade 12', year: '2024', term: 'November', type: 'Paper 1' },
     { id: 2, subject: 'Mathematics', grade: 'Grade 12', year: '2024', term: 'November', type: 'Paper 2' },
@@ -36,6 +42,19 @@ const pastPapers = [
 
 const subjects = ['All', 'Mathematics', 'Physical Sciences', 'Life Sciences', 'English', 'Accounting', 'Geography'];
 const grades = ['All', 'Grade 10', 'Grade 11', 'Grade 12'];
+
+const mockStudySessions: StudySession[] = [
+    { date: '2026-04-10', minutes: 45, topic: 'Mathematics' },
+    { date: '2026-04-09', minutes: 60, topic: 'Physical Sciences' },
+    { date: '2026-04-08', minutes: 30, topic: 'English' },
+    { date: '2026-04-07', minutes: 90, topic: 'Mathematics' },
+    { date: '2026-04-06', minutes: 0, topic: '' },
+    { date: '2026-04-05', minutes: 50, topic: 'Life Sciences' },
+    { date: '2026-04-04', minutes: 75, topic: 'Physical Sciences' },
+    { date: '2026-04-03', minutes: 40, topic: 'Mathematics' },
+    { date: '2026-04-02', minutes: 55, topic: 'Geography' },
+    { date: '2026-04-01', minutes: 35, topic: 'Accounting' },
+];
 
 export default function StudyHub() {
     const { user } = useAuth();
@@ -60,12 +79,17 @@ export default function StudyHub() {
     const [newClassName, setNewClassName] = useState('');
     const [showCreateClass, setShowCreateClass] = useState(false);
     const [newDiscussion, setNewDiscussion] = useState('');
+    const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+    const [imageAnalysis, setImageAnalysis] = useState('');
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [perfPeriod, setPerfPeriod] = useState<'daily' | 'weekly' | 'monthly'>('weekly');
 
     const tabs: { key: Tab; label: string; icon: React.FC<any> }[] = [
         { key: 'upload', label: 'Upload & Analyze', icon: UploadIcon },
         { key: 'flashcards', label: 'Flashcards', icon: BookIcon },
         { key: 'papers', label: 'Past Papers', icon: FileIcon },
         { key: 'classroom', label: 'Classroom', icon: GraduationIcon },
+        { key: 'performance', label: 'Performance', icon: BarChartIcon },
     ];
 
     const handleSummarize = async () => {
@@ -113,6 +137,18 @@ export default function StudyHub() {
         setSummaryLoading(false);
     };
 
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                setUploadedImage(ev.target?.result as string);
+                setImageAnalysis('Image uploaded successfully. You can now use the text extraction and analysis tools. For best results, also paste any visible text from the image into the notes area above so the AI can analyze it.');
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
     const generateFlashcards = async () => {
         if (!uploadText.trim()) return;
         setFcLoading(true);
@@ -157,18 +193,32 @@ export default function StudyHub() {
         }
     };
 
+    // Performance calculations
+    const totalMinutes = mockStudySessions.reduce((sum, s) => sum + s.minutes, 0);
+    const activeDays = mockStudySessions.filter(s => s.minutes > 0).length;
+    const currentStreak = (() => {
+        let streak = 0;
+        for (const s of mockStudySessions) {
+            if (s.minutes > 0) streak++;
+            else break;
+        }
+        return streak;
+    })();
+    const avgMinutes = activeDays > 0 ? Math.round(totalMinutes / activeDays) : 0;
+    const maxBarHeight = Math.max(...mockStudySessions.map(s => s.minutes), 1);
+
     return (
         <div className="p-4 sm:p-6 max-w-6xl mx-auto">
             <h1 className="text-2xl font-bold mb-1">Study Hub</h1>
-            <p className="text-sm text-text-light mb-6">Upload notes, generate flashcards, access past papers, and join classrooms</p>
+            <p className="text-sm text-text-light mb-6">Upload notes, generate flashcards, access past papers, and track progress</p>
 
             {/* Tabs */}
-            <div className="flex gap-1 mb-6 bg-gray-100 rounded-lg p-1 overflow-x-auto">
+            <div className="flex gap-1 mb-6 bg-surface-dark rounded-lg p-1 overflow-x-auto">
                 {tabs.map(tab => (
                     <button
                         key={tab.key}
                         onClick={() => setActiveTab(tab.key)}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-all ${activeTab === tab.key ? 'bg-white shadow text-text' : 'text-text-light'}`}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-all ${activeTab === tab.key ? 'bg-surface-card shadow text-text' : 'text-text-light'}`}
                     >
                         <tab.icon size={16} />
                         {tab.label}
@@ -187,6 +237,28 @@ export default function StudyHub() {
                             placeholder="Paste your study notes, text from a PDF, or any content you want to analyze..."
                             className="input min-h-[160px] resize-y"
                         />
+
+                        {/* Image upload */}
+                        <div className="mt-3">
+                            <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                            {uploadedImage ? (
+                                <div className="flex items-start gap-3">
+                                    <div className="relative">
+                                        <img src={uploadedImage} alt="Uploaded notes" className="h-28 rounded-lg object-cover" />
+                                        <button onClick={() => { setUploadedImage(null); setImageAnalysis(''); if (fileInputRef.current) fileInputRef.current.value = ''; }} className="absolute -top-2 -right-2 w-6 h-6 bg-danger text-white rounded-full flex items-center justify-center">
+                                            <XIcon size={12} />
+                                        </button>
+                                    </div>
+                                    {imageAnalysis && <p className="text-xs text-text-light flex-1">{imageAnalysis}</p>}
+                                </div>
+                            ) : (
+                                <button onClick={() => fileInputRef.current?.click()} className="btn btn-outline btn-sm gap-1">
+                                    <ImageIcon size={14} />
+                                    Upload Image of Notes
+                                </button>
+                            )}
+                        </div>
+
                         <div className="flex gap-2 mt-3 flex-wrap">
                             <button onClick={handleSummarize} disabled={summaryLoading || !uploadText.trim()} className="btn btn-primary">
                                 {summaryLoading ? 'Processing...' : 'Summarize'}
@@ -271,6 +343,81 @@ export default function StudyHub() {
                 </div>
             )}
 
+            {/* Performance */}
+            {activeTab === 'performance' && (
+                <div className="space-y-4">
+                    {/* Stats Row */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div className="card !p-4 text-center">
+                            <FlameIcon size={24} className="mx-auto text-orange-500 mb-1" />
+                            <p className="text-2xl font-bold">{currentStreak}</p>
+                            <p className="text-xs text-text-light">Day Streak</p>
+                        </div>
+                        <div className="card !p-4 text-center">
+                            <BarChartIcon size={24} className="mx-auto text-blue-500 mb-1" />
+                            <p className="text-2xl font-bold">{Math.round(totalMinutes / 60)}h</p>
+                            <p className="text-xs text-text-light">Total Study Time</p>
+                        </div>
+                        <div className="card !p-4 text-center">
+                            <CheckIcon size={24} className="mx-auto text-green-500 mb-1" />
+                            <p className="text-2xl font-bold">{activeDays}/{mockStudySessions.length}</p>
+                            <p className="text-xs text-text-light">Active Days</p>
+                        </div>
+                        <div className="card !p-4 text-center">
+                            <GraduationIcon size={24} className="mx-auto text-purple-500 mb-1" />
+                            <p className="text-2xl font-bold">{avgMinutes}m</p>
+                            <p className="text-xs text-text-light">Avg per Session</p>
+                        </div>
+                    </div>
+
+                    {/* Period toggle */}
+                    <div className="flex gap-1 bg-surface-dark rounded-lg p-1 w-fit">
+                        {(['daily', 'weekly', 'monthly'] as const).map(p => (
+                            <button key={p} onClick={() => setPerfPeriod(p)} className={`px-4 py-1.5 rounded-md text-xs font-medium transition-all capitalize ${perfPeriod === p ? 'bg-surface-card shadow text-text' : 'text-text-light'}`}>{p}</button>
+                        ))}
+                    </div>
+
+                    {/* Study Chart */}
+                    <div className="card">
+                        <h3 className="font-bold mb-4">Study Activity</h3>
+                        <div className="flex items-end gap-2 h-40">
+                            {mockStudySessions.slice(0, perfPeriod === 'daily' ? 7 : perfPeriod === 'weekly' ? 7 : 10).reverse().map((session, i) => {
+                                const height = maxBarHeight > 0 ? (session.minutes / maxBarHeight) * 100 : 0;
+                                const dayLabel = new Date(session.date).toLocaleDateString('en-ZA', { weekday: 'short' });
+                                return (
+                                    <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                                        <span className="text-[10px] text-text-muted">{session.minutes}m</span>
+                                        <div className="w-full bg-surface-dark rounded-t-sm relative" style={{ height: '120px' }}>
+                                            <div
+                                                className={`absolute bottom-0 w-full rounded-t-sm transition-all ${session.minutes > 0 ? 'bg-primary' : 'bg-border'}`}
+                                                style={{ height: `${Math.max(height, 3)}%` }}
+                                            />
+                                        </div>
+                                        <span className="text-[10px] text-text-muted">{dayLabel}</span>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {/* Recent Sessions */}
+                    <div className="card">
+                        <h3 className="font-bold mb-3">Recent Sessions</h3>
+                        <div className="space-y-2">
+                            {mockStudySessions.filter(s => s.minutes > 0).slice(0, 5).map((s, i) => (
+                                <div key={i} className="flex items-center justify-between py-2 border-b border-border last:border-0">
+                                    <div>
+                                        <p className="text-sm font-medium">{s.topic}</p>
+                                        <p className="text-xs text-text-muted">{new Date(s.date).toLocaleDateString('en-ZA', { weekday: 'long', day: 'numeric', month: 'short' })}</p>
+                                    </div>
+                                    <span className="text-sm font-semibold text-primary">{s.minutes} min</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Classroom */}
             {activeTab === 'classroom' && (
                 <div>
@@ -312,7 +459,7 @@ export default function StudyHub() {
                                         { user: 'Thabo', msg: 'Can someone share their notes on momentum?', time: '2h ago' },
                                         { user: 'Sarah', msg: 'Check the shared notes, I uploaded them yesterday', time: '1h ago' },
                                     ].map((d, i) => (
-                                        <div key={i} className="bg-gray-50 rounded-lg p-3">
+                                        <div key={i} className="bg-surface-dark rounded-lg p-3">
                                             <div className="flex items-center gap-2 mb-1">
                                                 <UserIcon size={12} className="text-text-muted" />
                                                 <span className="text-xs font-medium">{d.user}</span>

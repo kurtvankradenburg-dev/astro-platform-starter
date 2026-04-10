@@ -21,8 +21,17 @@ const quickActions: { page: Page; label: string; desc: string; icon: React.FC<an
     { page: 'chat', label: 'Chat', desc: 'Community chat', icon: ChatIcon, color: 'bg-teal-500' },
 ];
 
+const townBanners: Record<string, string> = {
+    'Johannesburg': 'https://images.unsplash.com/photo-1577948000111-9c970dfe3743?w=800&h=300&fit=crop',
+    'Cape Town': 'https://images.unsplash.com/photo-1580060839134-75a5edca2e99?w=800&h=300&fit=crop',
+    'Durban': 'https://images.unsplash.com/photo-1588001832198-c15cff59b078?w=800&h=300&fit=crop',
+    'Pretoria': 'https://images.unsplash.com/photo-1624880732477-24a3e4099e0c?w=800&h=300&fit=crop',
+    'default': 'https://images.unsplash.com/photo-1573804633927-bfcbcd909acd?w=800&h=300&fit=crop',
+};
+
 export default function Dashboard({ onNavigate }: DashboardProps) {
     const { user } = useAuth();
+    const bannerUrl = townBanners[user?.town || ''] || townBanners['default'];
 
     const stats = [
         { label: 'Reports Filed', value: '12', icon: FileIcon, color: 'text-blue-500' },
@@ -33,16 +42,17 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
 
     return (
         <div className="p-4 sm:p-6 max-w-6xl mx-auto">
-            {/* Welcome Banner */}
-            <div className="bg-gradient-to-r from-green-600 to-emerald-500 rounded-2xl p-6 sm:p-8 text-white mb-6 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/4" />
-                <div className="relative">
-                    <div className="flex items-center gap-2 text-green-100 text-sm mb-2">
+            {/* Welcome Banner with Town Image */}
+            <div className="rounded-2xl mb-6 relative overflow-hidden">
+                <img src={bannerUrl} alt={user?.town} className="w-full h-48 sm:h-56 object-cover" loading="lazy" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
+                    <div className="flex items-center gap-2 text-green-300 text-sm mb-2">
                         <MapPinIcon size={14} />
                         <span>{user?.town}</span>
                     </div>
-                    <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Welcome back, {user?.name?.split(' ')[0]}!</h1>
-                    <p className="text-green-100 text-sm sm:text-base max-w-lg">Your community dashboard — stay informed, contribute, and make your town greener.</p>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1">Welcome back, {user?.name?.split(' ')[0]}!</h1>
+                    <p className="text-gray-300 text-sm sm:text-base max-w-lg">Your community dashboard — stay informed, contribute, and make your town greener.</p>
                 </div>
             </div>
 
@@ -54,7 +64,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                             <stat.icon size={22} />
                         </div>
                         <div>
-                            <p className="text-xl font-bold text-text">{stat.value}</p>
+                            <p className="text-xl font-bold">{stat.value}</p>
                             <p className="text-xs text-text-light">{stat.label}</p>
                         </div>
                     </div>
@@ -73,7 +83,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                         <div className={`${action.color} w-10 h-10 rounded-lg flex items-center justify-center mb-3`}>
                             <action.icon size={20} className="text-white" />
                         </div>
-                        <p className="font-semibold text-sm text-text">{action.label}</p>
+                        <p className="font-semibold text-sm">{action.label}</p>
                         <p className="text-xs text-text-light mt-0.5">{action.desc}</p>
                     </button>
                 ))}
@@ -81,7 +91,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
 
             {/* Recent Activity */}
             <h2 className="text-lg font-bold mb-3">Recent Activity</h2>
-            <div className="card !p-0 divide-y divide-border">
+            <div className="card !p-0 divide-y divide-border mb-6">
                 {[
                     { text: 'Water outage reported in your area', time: '2 hours ago', type: 'alert' },
                     { text: 'New sustainability article published', time: '5 hours ago', type: 'knowledge' },
@@ -90,14 +100,14 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                 ].map((item, i) => (
                     <div key={i} className="flex items-center gap-3 p-4">
                         <div className={`w-2 h-2 rounded-full shrink-0 ${item.type === 'alert' ? 'bg-red-500' : item.type === 'knowledge' ? 'bg-blue-500' : item.type === 'event' ? 'bg-green-500' : 'bg-amber-500'}`} />
-                        <p className="text-sm text-text flex-1">{item.text}</p>
+                        <p className="text-sm flex-1">{item.text}</p>
                         <span className="text-xs text-text-muted whitespace-nowrap">{item.time}</span>
                     </div>
                 ))}
             </div>
 
             {/* Town Info */}
-            <div className="mt-6 grid sm:grid-cols-2 gap-4">
+            <div className="grid sm:grid-cols-2 gap-4">
                 <div className="card">
                     <h3 className="font-bold text-base mb-3">Town Overview</h3>
                     <div className="space-y-2 text-sm">

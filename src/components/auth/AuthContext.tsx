@@ -36,7 +36,19 @@ export const useAuth = () => useContext(AuthContext);
 const TOWNS = [
     'Johannesburg', 'Cape Town', 'Durban', 'Pretoria', 'Port Elizabeth',
     'Bloemfontein', 'Polokwane', 'Nelspruit', 'Kimberley', 'East London',
-    'Soweto', 'Sandton', 'Centurion', 'Midrand', 'Randburg'
+    'Soweto', 'Sandton', 'Centurion', 'Midrand', 'Randburg',
+    'Upington', 'Stellenbosch', 'Paarl', 'George', 'Knysna',
+    'Rustenburg', 'Pietermaritzburg', 'Mbombela', 'Mahikeng', 'Mthatha',
+    'Grahamstown', 'Limpopo', 'Tzaneen', 'Thohoyandou', 'Musina',
+    'Klerksdorp', 'Potchefstroom', 'Vereeniging', 'Benoni', 'Boksburg',
+    'Springs', 'Witbank', 'Secunda', 'Standerton', 'Ermelo',
+    'Newcastle', 'Richards Bay', 'Empangeni', 'Ladysmith', 'Vryheid',
+    'Welkom', 'Kroonstad', 'Bethlehem', 'Queenstown', 'Graaff-Reinet',
+    'Oudtshoorn', 'Mossel Bay', 'Hermanus', 'Worcester', 'Bredasdorp',
+    'Beaufort West', 'Clanwilliam', 'Springbok', 'De Aar', 'Colesberg',
+    'Aliwal North', 'Cradock', 'Uitenhage', 'Jeffreys Bay', 'Plettenberg Bay',
+    'Lephalale', 'Mokopane', 'Giyani', 'Phalaborwa', 'Bela-Bela',
+    'Thabazimbi', 'Brits', 'Hartbeespoort', 'Sun City', 'Zeerust'
 ];
 
 export { TOWNS };
@@ -69,8 +81,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 id: idUser.id || crypto.randomUUID(),
                 email: idUser.email || email,
                 name: idUser.name || email.split('@')[0],
-                town: idUser.userMetadata?.town || 'Johannesburg',
-                role: idUser.userMetadata?.role || 'citizen',
+                town: (idUser.userMetadata?.town as string) || 'Johannesburg',
+                role: (idUser.userMetadata?.role as string) || 'citizen',
                 points: Number(idUser.userMetadata?.points) || 0,
                 streak: Number(idUser.userMetadata?.streak) || 0,
                 joinedAt: idUser.createdAt || new Date().toISOString(),
@@ -107,7 +119,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 streak: 0,
                 joinedAt: new Date().toISOString(),
             };
-            if (idUser.emailVerified) {
+            if ((idUser as any).emailVerified) {
                 persistUser(u);
             } else {
                 persistUser(u);

@@ -12,14 +12,14 @@ export default async (req: Request, context: Context) => {
         }
 
         let prompt = '';
-        let systemPrompt = 'You are a study assistant built into the Eco City platform. Help students learn effectively. Be clear, educational, and encouraging.';
+        let systemPrompt = 'You are a study assistant built into the Eco City platform. Help students learn effectively. Be clear, educational, and encouraging. IMPORTANT FORMATTING RULES: Always respond in clean, well-structured paragraphs. Never use bullet points, asterisks, stars, or hashtags. Do not use markdown formatting like bold or headers. Use proper punctuation and natural sentence flow. The only exception is when generating flashcards as JSON.';
 
         switch (action) {
             case 'summarize':
-                prompt = `Please provide a clear, structured summary of the following study material. Use bullet points where appropriate:\n\n${text}`;
+                prompt = `Please provide a clear, structured summary of the following study material in well-written paragraphs. Do not use bullet points or special formatting:\n\n${text}`;
                 break;
             case 'explain':
-                prompt = `Please explain the following concept in simple, clear terms. Use examples where helpful:\n\n${text}`;
+                prompt = `Please explain the following concept in simple, clear paragraphs. Use examples where helpful but do not use bullet points or special formatting:\n\n${text}`;
                 break;
             case 'ask':
                 prompt = `Based on the following study material:\n\n${text}\n\nPlease answer this question:\n${question}`;

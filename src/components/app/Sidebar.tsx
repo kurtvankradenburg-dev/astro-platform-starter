@@ -1,10 +1,11 @@
 import React from 'react';
 import { useAuth } from '../auth/AuthContext';
+import { useTheme } from '../theme/ThemeContext';
 import type { Page } from './App';
 import {
     HomeIcon, BookIcon, BotIcon, GraduationIcon, HeartIcon, StoreIcon,
     ChatIcon, FileIcon, AlertIcon, TrophyIcon, SettingsIcon, LogOutIcon,
-    LeafIcon, ShieldIcon, InfoIcon, GlobeIcon
+    LeafIcon, ShieldIcon, InfoIcon, GlobeIcon, SunIcon, MoonIcon
 } from '../ui/Icons';
 
 interface SidebarProps {
@@ -30,6 +31,7 @@ const navItems: { page: Page; label: string; icon: React.FC<any>; section?: stri
 
 export default function Sidebar({ currentPage, onNavigate }: SidebarProps) {
     const { user, logout } = useAuth();
+    const { theme, toggleTheme } = useTheme();
 
     return (
         <div className="w-64 h-full bg-sidebar flex flex-col">
@@ -38,10 +40,17 @@ export default function Sidebar({ currentPage, onNavigate }: SidebarProps) {
                 <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center shrink-0">
                     <LeafIcon className="text-white" size={20} />
                 </div>
-                <div>
+                <div className="flex-1 min-w-0">
                     <h2 className="text-white font-bold text-base leading-tight">Eco City</h2>
-                    <p className="text-gray-400 text-xs">{user?.town}</p>
+                    <p className="text-gray-400 text-xs truncate">{user?.town}</p>
                 </div>
+                <button
+                    onClick={toggleTheme}
+                    className="p-1.5 rounded-lg hover:bg-sidebar-hover text-gray-400 hover:text-white transition-colors shrink-0"
+                    title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+                >
+                    {theme === 'light' ? <MoonIcon size={16} /> : <SunIcon size={16} />}
+                </button>
             </div>
 
             {/* Nav */}
