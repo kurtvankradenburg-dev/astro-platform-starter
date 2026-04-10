@@ -21,17 +21,17 @@ const quickActions: { page: Page; label: string; desc: string; icon: React.FC<an
     { page: 'chat', label: 'Chat', desc: 'Community chat', icon: ChatIcon, color: 'bg-teal-500' },
 ];
 
-const townBanners: Record<string, string> = {
-    'Johannesburg': 'https://images.unsplash.com/photo-1577948000111-9c970dfe3743?w=800&h=300&fit=crop',
-    'Cape Town': 'https://images.unsplash.com/photo-1580060839134-75a5edca2e99?w=800&h=300&fit=crop',
-    'Durban': 'https://images.unsplash.com/photo-1588001832198-c15cff59b078?w=800&h=300&fit=crop',
-    'Pretoria': 'https://images.unsplash.com/photo-1624880732477-24a3e4099e0c?w=800&h=300&fit=crop',
-    'default': 'https://images.unsplash.com/photo-1573804633927-bfcbcd909acd?w=800&h=300&fit=crop',
+const townGradients: Record<string, string> = {
+    'Johannesburg': 'from-amber-600 via-orange-500 to-yellow-400',
+    'Cape Town': 'from-blue-600 via-cyan-500 to-teal-400',
+    'Durban': 'from-emerald-600 via-green-500 to-lime-400',
+    'Pretoria': 'from-purple-600 via-violet-500 to-indigo-400',
+    'default': 'from-green-600 via-emerald-500 to-teal-400',
 };
 
 export default function Dashboard({ onNavigate }: DashboardProps) {
     const { user } = useAuth();
-    const bannerUrl = townBanners[user?.town || ''] || townBanners['default'];
+    const bannerGradient = townGradients[user?.town || ''] || townGradients['default'];
 
     const stats = [
         { label: 'Reports Filed', value: '12', icon: FileIcon, color: 'text-blue-500' },
@@ -42,17 +42,23 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
 
     return (
         <div className="p-4 sm:p-6 max-w-6xl mx-auto">
-            {/* Welcome Banner with Town Image */}
-            <div className="rounded-2xl mb-6 relative overflow-hidden">
-                <img src={bannerUrl} alt={user?.town} className="w-full h-48 sm:h-56 object-cover" loading="lazy" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+            {/* Welcome Banner */}
+            <div className={`rounded-2xl mb-6 relative overflow-hidden bg-gradient-to-br ${bannerGradient} h-48 sm:h-56`}>
+                <div className="absolute inset-0 opacity-10">
+                    <svg className="w-full h-full" viewBox="0 0 800 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="700" cy="50" r="120" fill="white"/>
+                        <circle cx="100" cy="250" r="80" fill="white"/>
+                        <path d="M400 20C400 20 350 80 350 120C350 160 370 200 400 210C430 200 450 160 450 120C450 80 400 20 400 20Z" fill="white"/>
+                    </svg>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
-                    <div className="flex items-center gap-2 text-green-300 text-sm mb-2">
+                    <div className="flex items-center gap-2 text-green-200 text-sm mb-2">
                         <MapPinIcon size={14} />
                         <span>{user?.town}</span>
                     </div>
                     <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1">Welcome back, {user?.name?.split(' ')[0]}!</h1>
-                    <p className="text-gray-300 text-sm sm:text-base max-w-lg">Your community dashboard — stay informed, contribute, and make your town greener.</p>
+                    <p className="text-white/80 text-sm sm:text-base max-w-lg">Your community dashboard — stay informed, contribute, and make your town greener.</p>
                 </div>
             </div>
 
