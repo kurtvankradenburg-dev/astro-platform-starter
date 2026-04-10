@@ -32,8 +32,6 @@ function AboutPage() {
                 </div>
             </div>
 
-            <img src="https://images.unsplash.com/photo-1573804633927-bfcbcd909acd?w=800&h=300&fit=crop" alt="South African community" className="w-full h-48 object-cover rounded-xl mb-6" loading="lazy" />
-
             <div className="grid sm:grid-cols-2 gap-6">
                 <div className="card">
                     <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center mb-3">

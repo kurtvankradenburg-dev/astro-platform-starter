@@ -8,9 +8,14 @@ interface User {
     role: string;
     points: number;
     streak: number;
+    lastLoginDate?: string;
     joinedAt: string;
     avatar?: string;
     notificationsEnabled?: boolean;
+    notificationLevel?: 'all' | 'critical' | 'none';
+    showOnLeaderboard?: boolean;
+    language?: string;
+    aiTone?: string;
 }
 
 interface AuthContextType {
@@ -53,6 +58,18 @@ const TOWNS = [
 
 export { TOWNS };
 
+function computeStreak(lastLoginDate: string | undefined, currentStreak: number): { streak: number; lastLoginDate: string } {
+    const today = new Date().toDateString();
+    if (!lastLoginDate) return { streak: 1, lastLoginDate: today };
+    const last = new Date(lastLoginDate).toDateString();
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toDateString();
+    if (last === today) return { streak: currentStreak, lastLoginDate: today };
+    if (last === yesterdayStr) return { streak: currentStreak + 1, lastLoginDate: today };
+    return { streak: 1, lastLoginDate: today };
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
@@ -61,8 +78,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const stored = localStorage.getItem('ecocity_user');
         if (stored) {
             try {
-                setUser(JSON.parse(stored));
-            } catch {}
+                const parsed: User = JSON.parse(stored);
+                // Update streak on app load (daily login)
+                const { streak, lastLoginDate } = computeStreak(parsed.lastLoginDate, parsed.streak);
+                const pointsBonus = streak > (parsed.streak || 0) ? 5 : 0;
+                const updated = { ...parsed, streak, lastLoginDate, points: (parsed.points || 0) + pointsBonus };
+                setUser(updated);
+                localStorage.setItem('ecocity_user', JSON.stringify(updated));
+            } catch {
+                setLoading(false);
+            }
         }
         setLoading(false);
     }, []);
@@ -77,29 +102,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
             const { login: idLogin } = await import('@netlify/identity');
             const idUser = await idLogin(email, password);
+            const storedRaw = localStorage.getItem('ecocity_user');
+            const stored: Partial<User> = storedRaw ? JSON.parse(storedRaw) : {};
+            const { streak, lastLoginDate } = computeStreak(stored.lastLoginDate, stored.streak || 0);
             const u: User = {
                 id: idUser.id || crypto.randomUUID(),
                 email: idUser.email || email,
                 name: idUser.name || email.split('@')[0],
-                town: (idUser.userMetadata?.town as string) || 'Johannesburg',
+                town: (idUser.userMetadata?.town as string) || stored.town || 'Johannesburg',
                 role: (idUser.userMetadata?.role as string) || 'citizen',
-                points: Number(idUser.userMetadata?.points) || 0,
-                streak: Number(idUser.userMetadata?.streak) || 0,
-                joinedAt: idUser.createdAt || new Date().toISOString(),
-                notificationsEnabled: idUser.userMetadata?.notificationsEnabled === 'true',
+                points: (stored.points || 0) + 5,
+                streak,
+                lastLoginDate,
+                joinedAt: idUser.createdAt || stored.joinedAt || new Date().toISOString(),
+                notificationsEnabled: stored.notificationsEnabled,
+                notificationLevel: stored.notificationLevel || 'all',
+                showOnLeaderboard: stored.showOnLeaderboard !== false,
+                language: stored.language || 'en',
+                aiTone: stored.aiTone || 'helpful',
             };
             persistUser(u);
         } catch {
-            // Fallback for local dev
+            const storedRaw = localStorage.getItem('ecocity_user');
+            const stored: Partial<User> = storedRaw ? JSON.parse(storedRaw) : {};
+            const { streak, lastLoginDate } = computeStreak(stored.lastLoginDate, stored.streak || 0);
+            const isReturning = !!stored.email && stored.email === email;
             const u: User = {
-                id: crypto.randomUUID(),
+                id: stored.id || crypto.randomUUID(),
                 email,
-                name: email.split('@')[0],
-                town: 'Johannesburg',
-                role: 'citizen',
-                points: 0,
-                streak: 0,
-                joinedAt: new Date().toISOString(),
+                name: stored.name || email.split('@')[0],
+                town: stored.town || 'Johannesburg',
+                role: stored.role || 'citizen',
+                points: (stored.points || 0) + (isReturning ? 5 : 0),
+                streak: isReturning ? streak : 1,
+                lastLoginDate: isReturning ? lastLoginDate : new Date().toDateString(),
+                joinedAt: stored.joinedAt || new Date().toISOString(),
+                notificationsEnabled: stored.notificationsEnabled,
+                notificationLevel: stored.notificationLevel || 'all',
+                showOnLeaderboard: stored.showOnLeaderboard !== false,
+                language: stored.language || 'en',
+                aiTone: stored.aiTone || 'helpful',
             };
             persistUser(u);
         }
@@ -112,18 +154,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const u: User = {
                 id: idUser.id || crypto.randomUUID(),
                 email: idUser.email || email,
-                name: name,
-                town: town,
+                name,
+                town,
                 role: 'citizen',
                 points: 0,
-                streak: 0,
+                streak: 1,
+                lastLoginDate: new Date().toDateString(),
                 joinedAt: new Date().toISOString(),
+                notificationLevel: 'all',
+                showOnLeaderboard: true,
+                language: 'en',
+                aiTone: 'helpful',
             };
-            if ((idUser as any).emailVerified) {
-                persistUser(u);
-            } else {
-                persistUser(u);
-            }
+            persistUser(u);
         } catch {
             const u: User = {
                 id: crypto.randomUUID(),
@@ -132,8 +175,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 town,
                 role: 'citizen',
                 points: 0,
-                streak: 0,
+                streak: 1,
+                lastLoginDate: new Date().toDateString(),
                 joinedAt: new Date().toISOString(),
+                notificationLevel: 'all',
+                showOnLeaderboard: true,
+                language: 'en',
+                aiTone: 'helpful',
             };
             persistUser(u);
         }

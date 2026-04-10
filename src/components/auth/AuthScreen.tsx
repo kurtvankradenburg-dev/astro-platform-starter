@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useAuth, TOWNS } from './AuthContext';
 import { LeafIcon, EyeIcon, EyeOffIcon, SearchIcon } from '../ui/Icons';
 
@@ -14,8 +14,18 @@ export default function AuthScreen() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [rememberMe, setRememberMe] = useState(false);
     const [agreedToTerms, setAgreedToTerms] = useState(false);
     const [showTermsModal, setShowTermsModal] = useState<'terms' | 'privacy' | null>(null);
+
+    // Pre-fill remembered email on mount
+    useEffect(() => {
+        const remembered = localStorage.getItem('ecocity_remembered_email');
+        if (remembered) {
+            setEmail(remembered);
+            setRememberMe(true);
+        }
+    }, []);
 
     const filteredTowns = useMemo(() => {
         if (!townSearch) return TOWNS.slice(0, 10);
@@ -27,12 +37,27 @@ export default function AuthScreen() {
     const isSignupValid = isEmailValid && isPasswordValid && name.trim().length > 0 && town.length > 0 && agreedToTerms;
     const isLoginValid = isEmailValid && isPasswordValid;
 
+    const switchToSignup = () => {
+        setIsLogin(false);
+        setError('');
+    };
+
+    const switchToLogin = () => {
+        setIsLogin(true);
+        setError('');
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
         setLoading(true);
         try {
             if (isLogin) {
+                if (rememberMe) {
+                    localStorage.setItem('ecocity_remembered_email', email);
+                } else {
+                    localStorage.removeItem('ecocity_remembered_email');
+                }
                 await login(email, password);
             } else {
                 if (!name.trim()) { setError('Please enter your name'); setLoading(false); return; }
@@ -40,7 +65,7 @@ export default function AuthScreen() {
                 await signup(email, password, name, town);
             }
         } catch (err: any) {
-            setError(err?.message || 'Something went wrong');
+            setError(err?.message || 'Something went wrong. Please try again.');
         }
         setLoading(false);
     };
@@ -59,25 +84,41 @@ export default function AuthScreen() {
                 <div className="card fade-in" style={{ animationDelay: '0.1s' }}>
                     <div className="flex mb-6 bg-surface-dark rounded-lg p-1">
                         <button
-                            onClick={() => setIsLogin(true)}
+                            onClick={switchToLogin}
                             className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${isLogin ? 'bg-surface-card shadow text-text' : 'text-text-light'}`}
                         >Sign In</button>
                         <button
-                            onClick={() => setIsLogin(false)}
+                            onClick={switchToSignup}
                             className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${!isLogin ? 'bg-surface-card shadow text-text' : 'text-text-light'}`}
                         >Sign Up</button>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                    <form onSubmit={handleSubmit} className="space-y-4" autoComplete="on">
                         {!isLogin && (
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Full Name</label>
-                                <input type="text" value={name} onChange={e => setName(e.target.value)} className="input" placeholder="John Doe" required={!isLogin} />
+                                <input
+                                    type="text"
+                                    value={name}
+                                    onChange={e => setName(e.target.value)}
+                                    className="input"
+                                    placeholder="John Doe"
+                                    autoComplete="name"
+                                    required={!isLogin}
+                                />
                             </div>
                         )}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
-                            <input type="email" value={email} onChange={e => setEmail(e.target.value)} className="input" placeholder="you@example.com" required />
+                            <input
+                                type="email"
+                                value={email}
+                                onChange={e => setEmail(e.target.value)}
+                                className="input"
+                                placeholder="you@example.com"
+                                autoComplete="email"
+                                required
+                            />
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
@@ -88,6 +129,7 @@ export default function AuthScreen() {
                                     onChange={e => setPassword(e.target.value)}
                                     className="input pr-10"
                                     placeholder="••••••••"
+                                    autoComplete={isLogin ? 'current-password' : 'new-password'}
                                     required
                                     minLength={6}
                                 />
@@ -100,6 +142,19 @@ export default function AuthScreen() {
                                 </button>
                             </div>
                         </div>
+
+                        {isLogin && (
+                            <label className="flex items-center gap-2 cursor-pointer select-none">
+                                <input
+                                    type="checkbox"
+                                    checked={rememberMe}
+                                    onChange={e => setRememberMe(e.target.checked)}
+                                    className="w-4 h-4 rounded border-border text-primary focus:ring-primary accent-primary"
+                                />
+                                <span className="text-sm text-gray-600 dark:text-gray-400">Remember me</span>
+                            </label>
+                        )}
+
                         {!isLogin && (
                             <>
                                 <div className="relative">
@@ -113,6 +168,7 @@ export default function AuthScreen() {
                                             onFocus={() => setShowTownDropdown(true)}
                                             className="input pl-10"
                                             placeholder="Search for your town..."
+                                            autoComplete="off"
                                         />
                                     </div>
                                     {showTownDropdown && (
@@ -133,7 +189,7 @@ export default function AuthScreen() {
                                                     onClick={() => { setTown(townSearch); setShowTownDropdown(false); }}
                                                     className="w-full text-left px-4 py-2 text-sm text-primary font-medium hover:bg-primary/10"
                                                 >
-                                                    + Create "{townSearch}" as your town
+                                                    + Use "{townSearch}" as your town
                                                 </button>
                                             )}
                                         </div>
@@ -157,7 +213,9 @@ export default function AuthScreen() {
                                 </label>
                             </>
                         )}
-                        {error && <p className="text-red-500 text-sm">{error}</p>}
+
+                        {error && <p className="text-red-500 text-sm bg-red-50 dark:bg-red-900/20 px-3 py-2 rounded-lg">{error}</p>}
+
                         <button
                             type="submit"
                             disabled={loading || (isLogin ? !isLoginValid : !isSignupValid)}
@@ -170,14 +228,20 @@ export default function AuthScreen() {
                             {loading ? 'Please wait...' : isLogin ? 'Sign In' : 'Create Account'}
                         </button>
                     </form>
+
+                    <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-4">
+                        {isLogin ? "Don't have an account? " : "Already have an account? "}
+                        <button onClick={isLogin ? switchToSignup : switchToLogin} className="text-primary hover:underline font-medium">
+                            {isLogin ? 'Sign Up' : 'Sign In'}
+                        </button>
+                    </p>
                 </div>
 
-                <p className="text-center text-xs text-gray-400 mt-6">
-                    By continuing, you agree to our Terms of Service and Privacy Policy.
+                <p className="text-center text-xs text-gray-400 mt-4">
+                    Built by Kurt van Kradenburg, Anjanette Venter, Ninke Hough & Ryan Cronje
                 </p>
             </div>
 
-            {/* Terms/Privacy Modal */}
             {showTermsModal && (
                 <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowTermsModal(null)}>
                     <div className="bg-surface-card rounded-xl border border-border max-w-lg w-full max-h-[70vh] overflow-y-auto p-6" onClick={e => e.stopPropagation()}>

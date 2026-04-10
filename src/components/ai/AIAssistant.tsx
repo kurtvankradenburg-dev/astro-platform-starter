@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../auth/AuthContext';
-import { BotIcon, SendIcon, PlusIcon, ClockIcon, TrashIcon } from '../ui/Icons';
+import { BotIcon, SendIcon, PlusIcon, ClockIcon, TrashIcon, ChevronDownIcon } from '../ui/Icons';
 
 interface Message {
     role: 'user' | 'assistant';
@@ -15,27 +15,30 @@ interface Conversation {
     createdAt: string;
 }
 
+type Tone = 'helpful' | 'formal' | 'casual' | 'educational' | 'creative';
+
+const toneOptions: { value: Tone; label: string; desc: string }[] = [
+    { value: 'helpful', label: 'Helpful', desc: 'Clear and balanced' },
+    { value: 'formal', label: 'Formal', desc: 'Professional & structured' },
+    { value: 'casual', label: 'Casual', desc: 'Friendly & relaxed' },
+    { value: 'educational', label: 'Educational', desc: 'Teaching-focused' },
+    { value: 'creative', label: 'Creative', desc: 'Imaginative & engaging' },
+];
+
 export default function AIAssistant() {
-    const { user } = useAuth();
+    const { user, updateUser } = useAuth();
 
     const formatAIResponse = (content: string) => {
-        // Strip markdown artifacts: hashtags at start of lines, asterisks for bold/italic, bullet points
         const cleaned = content
             .replace(/^#{1,6}\s*/gm, '')
             .replace(/\*{1,3}([^*]+)\*{1,3}/g, '$1')
             .replace(/^[\-\*]\s+/gm, '')
             .replace(/^>\s*/gm, '')
             .replace(/`([^`]+)`/g, '$1');
-
-        // Split into paragraphs by double newlines or single newlines that separate blocks
         const paragraphs = cleaned.split(/\n\s*\n|\n(?=[A-Z])/).map(p => p.trim()).filter(Boolean);
-
         if (paragraphs.length <= 1) {
-            // If it's a single block, split by single newlines for line breaks
             const lines = cleaned.split('\n').map(l => l.trim()).filter(Boolean);
-            if (lines.length <= 1) {
-                return <p>{cleaned}</p>;
-            }
+            if (lines.length <= 1) return <p>{cleaned}</p>;
             return lines.map((line, i) => <p key={i}>{line}</p>);
         }
         return paragraphs.map((para, i) => <p key={i}>{para}</p>);
@@ -51,7 +54,10 @@ export default function AIAssistant() {
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
     const [showHistory, setShowHistory] = useState(false);
+    const [tone, setTone] = useState<Tone>((user?.aiTone as Tone) || 'helpful');
+    const [showToneDropdown, setShowToneDropdown] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const toneDropdownRef = useRef<HTMLDivElement>(null);
 
     const activeConv = conversations.find(c => c.id === activeConvId);
 
@@ -62,6 +68,22 @@ export default function AIAssistant() {
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [activeConv?.messages]);
+
+    useEffect(() => {
+        const handleClick = (e: MouseEvent) => {
+            if (toneDropdownRef.current && !toneDropdownRef.current.contains(e.target as Node)) {
+                setShowToneDropdown(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClick);
+        return () => document.removeEventListener('mousedown', handleClick);
+    }, []);
+
+    const handleToneChange = (t: Tone) => {
+        setTone(t);
+        setShowToneDropdown(false);
+        updateUser({ aiTone: t });
+    };
 
     const newConversation = () => {
         const conv: Conversation = {
@@ -111,7 +133,7 @@ export default function AIAssistant() {
             const res = await fetch('/api/ai-chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: msg, history }),
+                body: JSON.stringify({ message: msg, history, tone }),
             });
             const data = await res.json();
             const assistantMsg: Message = { role: 'assistant', content: data.response || 'Sorry, I could not process that.', timestamp: new Date().toISOString() };
@@ -130,8 +152,10 @@ export default function AIAssistant() {
 
     const formatDate = (iso: string) => {
         const d = new Date(iso);
-        return d.toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' });
+        return d.toLocaleDateString('en-ZA', { day: 'numeric', month: 'short' });
     };
+
+    const currentTone = toneOptions.find(t => t.value === tone) || toneOptions[0];
 
     return (
         <div className="flex h-[calc(100vh-3.5rem)]">
@@ -175,9 +199,34 @@ export default function AIAssistant() {
                         <ClockIcon size={18} />
                     </button>
                     <BotIcon size={20} className="text-primary" />
-                    <div>
+                    <div className="flex-1">
                         <h3 className="text-sm font-semibold">AI Assistant</h3>
-                        <p className="text-xs text-text-muted">Powered by AI — ask anything</p>
+                        <p className="text-xs text-text-muted">Powered by Claude AI</p>
+                    </div>
+
+                    {/* Tone selector */}
+                    <div className="relative" ref={toneDropdownRef}>
+                        <button
+                            onClick={() => setShowToneDropdown(!showToneDropdown)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-surface-dark hover:bg-border text-xs font-medium transition-colors"
+                        >
+                            <span>Tone: {currentTone.label}</span>
+                            <ChevronDownIcon size={12} className={`transition-transform ${showToneDropdown ? 'rotate-180' : ''}`} />
+                        </button>
+                        {showToneDropdown && (
+                            <div className="absolute right-0 top-full mt-1 w-48 bg-surface-card border border-border rounded-lg shadow-lg z-10 overflow-hidden">
+                                {toneOptions.map(t => (
+                                    <button
+                                        key={t.value}
+                                        onClick={() => handleToneChange(t.value)}
+                                        className={`w-full text-left px-3 py-2.5 text-xs hover:bg-primary/5 transition-colors ${tone === t.value ? 'bg-primary/10 text-primary font-semibold' : ''}`}
+                                    >
+                                        <p className="font-medium">{t.label}</p>
+                                        <p className="text-text-muted text-[10px]">{t.desc}</p>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -189,10 +238,11 @@ export default function AIAssistant() {
                                 <BotIcon size={28} className="text-primary" />
                             </div>
                             <h2 className="text-lg font-bold mb-2">How can I help you?</h2>
-                            <p className="text-sm text-text-light max-w-sm mb-6">I can help with anything — homework, coding, writing, research, general knowledge, and more.</p>
+                            <p className="text-sm text-text-light max-w-sm mb-2">I can help with anything — homework, coding, writing, research, general knowledge, and more.</p>
+                            <p className="text-xs text-text-muted mb-6">Current tone: <span className="text-primary font-medium">{currentTone.label}</span> — {currentTone.desc}</p>
                             <div className="grid grid-cols-2 gap-2 max-w-sm">
                                 {['Explain climate change', 'Help me study for exams', 'Write a short essay', 'Solve a math problem'].map(s => (
-                                    <button key={s} onClick={() => { setInput(s); }} className="text-xs text-left p-3 rounded-lg border border-border hover:border-primary/30 hover:bg-primary/5 transition-all">
+                                    <button key={s} onClick={() => setInput(s)} className="text-xs text-left p-3 rounded-lg border border-border hover:border-primary/30 hover:bg-primary/5 transition-all">
                                         {s}
                                     </button>
                                 ))}
@@ -203,9 +253,7 @@ export default function AIAssistant() {
                         <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                             <div className={`max-w-[85%] sm:max-w-[70%] ${msg.role === 'user' ? 'bg-primary text-white' : 'bg-surface-card border border-border text-text'} px-4 py-3 rounded-2xl ${msg.role === 'user' ? 'rounded-br-md' : 'rounded-bl-md'} shadow-sm`}>
                                 {msg.role === 'assistant' ? (
-                                    <div className="text-sm space-y-2">
-                                        {formatAIResponse(msg.content)}
-                                    </div>
+                                    <div className="text-sm space-y-2">{formatAIResponse(msg.content)}</div>
                                 ) : (
                                     <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                                 )}

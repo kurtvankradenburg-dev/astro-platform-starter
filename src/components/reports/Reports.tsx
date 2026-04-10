@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useAuth } from '../auth/AuthContext';
-import { FileIcon, PlusIcon, MapPinIcon, CheckIcon, ClockIcon, AlertIcon, ImageIcon, XIcon, CameraIcon } from '../ui/Icons';
+import { FileIcon, PlusIcon, MapPinIcon, CheckIcon, ClockIcon, AlertIcon, XIcon, CameraIcon } from '../ui/Icons';
 
 type ReportStatus = 'open' | 'in-progress' | 'resolved';
 type ReportCategory = 'potholes' | 'water-outages' | 'electrical' | 'loose-cables' | 'waste' | 'infrastructure' | 'environment' | 'safety' | 'other';
@@ -15,6 +15,7 @@ interface Report {
     author: string;
     createdAt: string;
     upvotes: number;
+    isEmergency?: boolean;
     imageUrl?: string;
 }
 
@@ -22,8 +23,8 @@ const sampleReports: Report[] = [
     { id: '1', title: 'Pothole on Main Road', description: 'Large pothole causing danger to vehicles near the intersection of Main and 5th. Multiple cars have been damaged over the past week and residents are concerned about safety.', category: 'potholes', status: 'open', location: 'Main Road & 5th Ave, Johannesburg', author: 'Thabo M.', createdAt: '2026-04-08T10:00:00Z', upvotes: 15, imageUrl: 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=400&h=250&fit=crop' },
     { id: '2', title: 'Streetlight not working', description: 'Streetlight has been off for 2 weeks at Park Street. The area is very dark at night and residents feel unsafe walking in the area after sundown.', category: 'electrical', status: 'in-progress', location: 'Park Street, Sandton', author: 'Sarah K.', createdAt: '2026-04-05T14:30:00Z', upvotes: 8, imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=400&h=250&fit=crop' },
     { id: '3', title: 'Illegal dumping near river', description: 'People are dumping waste near the community river creating a major health hazard. The waste includes plastic bags, food waste, and construction rubble.', category: 'waste', status: 'open', location: 'Riverside Area, Centurion', author: 'Mike R.', createdAt: '2026-04-07T09:15:00Z', upvotes: 23, imageUrl: 'https://images.unsplash.com/photo-1530587191325-3db32d826c18?w=400&h=250&fit=crop' },
-    { id: '4', title: 'Water pipe burst on Oak Avenue', description: 'Water pipe burst causing flooding on the street and nearby properties. Needs urgent repair from the municipal water department.', category: 'water-outages', status: 'resolved', location: 'Oak Avenue, Pretoria', author: 'Linda P.', createdAt: '2026-04-02T16:00:00Z', upvotes: 31, imageUrl: 'https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?w=400&h=250&fit=crop' },
-    { id: '5', title: 'Loose cables hanging over sidewalk', description: 'Telecommunication cables have come loose and are hanging low over the sidewalk. Risk of electrocution or injury to pedestrians.', category: 'loose-cables', status: 'open', location: 'Church Street, Midrand', author: 'David N.', createdAt: '2026-04-09T11:00:00Z', upvotes: 12, imageUrl: 'https://images.unsplash.com/photo-1558346490-a72e53ae2d4f?w=400&h=250&fit=crop' },
+    { id: '4', title: 'Water pipe burst on Oak Avenue', description: 'Water pipe burst causing flooding on the street and nearby properties. Needs urgent repair from the municipal water department.', category: 'water-outages', status: 'resolved', location: 'Oak Avenue, Pretoria', author: 'Linda P.', createdAt: '2026-04-02T16:00:00Z', upvotes: 31, isEmergency: true, imageUrl: 'https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?w=400&h=250&fit=crop' },
+    { id: '5', title: 'Loose cables hanging over sidewalk', description: 'Telecommunication cables have come loose and are hanging low over the sidewalk. Risk of electrocution or injury to pedestrians.', category: 'loose-cables', status: 'open', location: 'Church Street, Midrand', author: 'David N.', createdAt: '2026-04-09T11:00:00Z', upvotes: 12, isEmergency: true, imageUrl: 'https://images.unsplash.com/photo-1558346490-a72e53ae2d4f?w=400&h=250&fit=crop' },
     { id: '6', title: 'Water outage in Sector 12', description: 'No water supply since early morning. Residents have not been informed about the cause or expected restoration time.', category: 'water-outages', status: 'open', location: 'Sector 12, Soweto', author: 'Nomsa D.', createdAt: '2026-04-10T06:00:00Z', upvotes: 45, imageUrl: 'https://images.unsplash.com/photo-1581244277943-fe4a9c777189?w=400&h=250&fit=crop' },
 ];
 
@@ -58,26 +59,32 @@ const statusConfig: Record<ReportStatus, { label: string; color: string; icon: R
 };
 
 export default function Reports() {
-    const { user } = useAuth();
+    const { user, updateUser } = useAuth();
     const [reports, setReports] = useState<Report[]>(sampleReports);
     const [showNew, setShowNew] = useState(false);
     const [filter, setFilter] = useState<ReportStatus | 'all'>('all');
     const [categoryFilter, setCategoryFilter] = useState<ReportCategory | 'all'>('all');
-    const [newReport, setNewReport] = useState({ title: '', description: '', category: 'potholes' as ReportCategory, location: '' });
+    const [showEmergencyOnly, setShowEmergencyOnly] = useState(false);
+    const [newReport, setNewReport] = useState({ title: '', description: '', category: 'potholes' as ReportCategory, location: '', isEmergency: false });
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [detectingLocation, setDetectingLocation] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const filtered = reports.filter(r =>
-        (filter === 'all' || r.status === filter) &&
-        (categoryFilter === 'all' || r.category === categoryFilter)
-    );
+    const filtered = reports
+        .filter(r =>
+            (filter === 'all' || r.status === filter) &&
+            (categoryFilter === 'all' || r.category === categoryFilter) &&
+            (!showEmergencyOnly || r.isEmergency)
+        )
+        .sort((a, b) => {
+            // Emergency reports first
+            if (a.isEmergency && !b.isEmergency) return -1;
+            if (!a.isEmergency && b.isEmergency) return 1;
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        });
 
     const detectLocation = () => {
-        if (!navigator.geolocation) {
-            alert('Geolocation is not supported by your browser');
-            return;
-        }
+        if (!navigator.geolocation) { alert('Geolocation not supported by your browser'); return; }
         setDetectingLocation(true);
         navigator.geolocation.getCurrentPosition(
             (position) => {
@@ -114,12 +121,21 @@ export default function Reports() {
             author: user?.name || 'Anonymous',
             createdAt: new Date().toISOString(),
             upvotes: 0,
+            isEmergency: newReport.isEmergency,
             imageUrl: imagePreview || undefined,
         };
         setReports(prev => [report, ...prev]);
-        setNewReport({ title: '', description: '', category: 'potholes', location: '' });
+        updateUser({ points: (user?.points || 0) + 10 });
+        setNewReport({ title: '', description: '', category: 'potholes', location: '', isEmergency: false });
         setImagePreview(null);
         setShowNew(false);
+
+        if (report.isEmergency && 'Notification' in window && Notification.permission === 'granted') {
+            new Notification(`🚨 Emergency Report: ${report.title}`, {
+                body: `${report.location} — ${report.description.slice(0, 80)}`,
+                icon: '/favicon.svg',
+            });
+        }
     };
 
     const upvote = (id: string) => {
@@ -131,7 +147,7 @@ export default function Reports() {
             <div className="flex items-center justify-between mb-6">
                 <div>
                     <h1 className="text-2xl font-bold">Reports</h1>
-                    <p className="text-sm text-text-light mt-1">Report issues and track community concerns</p>
+                    <p className="text-sm text-text-light mt-1">Report issues and track community concerns in {user?.town}</p>
                 </div>
                 <button onClick={() => setShowNew(true)} className="btn btn-primary gap-1">
                     <PlusIcon size={16} />
@@ -143,6 +159,22 @@ export default function Reports() {
                 <div className="card mb-6 border-primary/30">
                     <h3 className="font-bold mb-3">Submit a Report</h3>
                     <div className="space-y-3">
+                        {/* Emergency toggle */}
+                        <label className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all ${newReport.isEmergency ? 'border-red-400 bg-red-50 dark:bg-red-900/20' : 'border-border'}`}>
+                            <input
+                                type="checkbox"
+                                checked={newReport.isEmergency}
+                                onChange={e => setNewReport(p => ({ ...p, isEmergency: e.target.checked }))}
+                                className="w-4 h-4 accent-red-500"
+                            />
+                            <div>
+                                <p className={`text-sm font-semibold ${newReport.isEmergency ? 'text-red-600 dark:text-red-400' : 'text-text'}`}>
+                                    🚨 Mark as Emergency
+                                </p>
+                                <p className="text-xs text-text-muted">Requires immediate attention — use for urgent safety/hazard situations</p>
+                            </div>
+                        </label>
+
                         <input value={newReport.title} onChange={e => setNewReport(p => ({ ...p, title: e.target.value }))} placeholder="Report title" className="input" />
                         <textarea value={newReport.description} onChange={e => setNewReport(p => ({ ...p, description: e.target.value }))} placeholder="Describe the issue in detail..." className="input min-h-[100px] resize-y" />
                         <div className="grid sm:grid-cols-2 gap-3">
@@ -157,7 +189,6 @@ export default function Reports() {
                             </div>
                         </div>
 
-                        {/* Image upload */}
                         <div>
                             <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                             {imagePreview ? (
@@ -176,7 +207,9 @@ export default function Reports() {
                         </div>
 
                         <div className="flex gap-2">
-                            <button onClick={submitReport} className="btn btn-primary">Submit Report</button>
+                            <button onClick={submitReport} className={`btn ${newReport.isEmergency ? 'btn-danger' : 'btn-primary'}`}>
+                                {newReport.isEmergency ? '🚨 Submit Emergency Report' : 'Submit Report'}
+                            </button>
                             <button onClick={() => { setShowNew(false); setImagePreview(null); }} className="btn btn-outline">Cancel</button>
                         </div>
                     </div>
@@ -184,14 +217,22 @@ export default function Reports() {
             )}
 
             {/* Filters */}
-            <div className="flex gap-2 mb-3 overflow-x-auto pb-2">
-                {(['all', 'open', 'in-progress', 'resolved'] as const).map(f => (
-                    <button
-                        key={f}
-                        onClick={() => setFilter(f)}
-                        className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${filter === f ? 'bg-primary text-white' : 'bg-surface-dark text-text-light hover:bg-border'}`}
-                    >{f === 'all' ? 'All' : statusConfig[f].label} ({f === 'all' ? reports.length : reports.filter(r => r.status === f).length})</button>
-                ))}
+            <div className="flex items-center gap-2 mb-3 flex-wrap">
+                <div className="flex gap-2 overflow-x-auto pb-1">
+                    {(['all', 'open', 'in-progress', 'resolved'] as const).map(f => (
+                        <button
+                            key={f}
+                            onClick={() => setFilter(f)}
+                            className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${filter === f ? 'bg-primary text-white' : 'bg-surface-dark text-text-light hover:bg-border'}`}
+                        >{f === 'all' ? 'All' : statusConfig[f].label} ({f === 'all' ? reports.length : reports.filter(r => r.status === f).length})</button>
+                    ))}
+                </div>
+                <button
+                    onClick={() => setShowEmergencyOnly(!showEmergencyOnly)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ml-auto ${showEmergencyOnly ? 'bg-red-500 text-white' : 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100'}`}
+                >
+                    🚨 Emergency Only
+                </button>
             </div>
             <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
                 {(['all', ...Object.keys(categoryLabels)] as const).map(c => (
@@ -204,16 +245,24 @@ export default function Reports() {
             </div>
 
             <div className="space-y-3">
-                {filtered.map(report => {
+                {filtered.length === 0 ? (
+                    <div className="card text-center py-10">
+                        <FileIcon size={32} className="mx-auto text-text-muted mb-3" />
+                        <p className="text-sm text-text-light">No reports match your filters.</p>
+                    </div>
+                ) : filtered.map(report => {
                     const sc = statusConfig[report.status];
                     return (
-                        <div key={report.id} className="card">
+                        <div key={report.id} className={`card ${report.isEmergency ? 'border-red-300 dark:border-red-700 bg-red-50/50 dark:bg-red-900/10' : ''}`}>
                             <div className="flex items-start gap-4">
                                 {report.imageUrl && (
                                     <img src={report.imageUrl} alt="" className="w-24 h-20 rounded-lg object-cover shrink-0 hidden sm:block" loading="lazy" />
                                 )}
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 flex-wrap mb-1">
+                                        {report.isEmergency && (
+                                            <span className="badge bg-red-500 text-white text-[10px] font-bold">🚨 EMERGENCY</span>
+                                        )}
                                         <h3 className="font-semibold text-sm">{report.title}</h3>
                                         <span className={`badge ${sc.color}`}>{sc.label}</span>
                                         <span className={`badge ${categoryColors[report.category]}`}>{categoryLabels[report.category]}</span>

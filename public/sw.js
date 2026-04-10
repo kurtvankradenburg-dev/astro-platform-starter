@@ -49,8 +49,8 @@ self.addEventListener('push', (event) => {
     const title = data.title || 'Eco City Alert';
     const options = {
         body: data.body || 'You have a new notification',
-        icon: '/icons/icon-192.png',
-        badge: '/icons/icon-192.png',
+        icon: '/icons/icon-192.svg',
+        badge: '/icons/icon-192.svg',
         tag: data.tag || 'ecocity-notification',
         data: { url: data.url || '/' },
     };

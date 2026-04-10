@@ -50,3 +50,6 @@ export const EyeOffIcon = (p: IconProps) => <svg {...s(p)}><path d="M17.94 17.94
 export const CameraIcon = (p: IconProps) => <svg {...s(p)}><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>;
 export const BarChartIcon = (p: IconProps) => <svg {...s(p)}><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>;
 export const BriefcaseIcon = (p: IconProps) => <svg {...s(p)}><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>;
+export const MaximizeIcon = (p: IconProps) => <svg {...s(p)}><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>;
+export const MinimizeIcon = (p: IconProps) => <svg {...s(p)}><path d="M8 3v3a2 2 0 01-2 2H3m18 0h-3a2 2 0 01-2-2V3m0 18v-3a2 2 0 012-2h3M3 16h3a2 2 0 012 2v3"/></svg>;
+export const HomeIcon2 = (p: IconProps) => <svg {...s(p)}><path d="M3 12L12 3l9 9"/><path d="M9 21V12h6v9"/></svg>;

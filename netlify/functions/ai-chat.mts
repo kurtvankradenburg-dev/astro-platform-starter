@@ -3,13 +3,23 @@ import Anthropic from '@anthropic-ai/sdk';
 
 const anthropic = new Anthropic();
 
+const toneInstructions: Record<string, string> = {
+    helpful: 'Be helpful, clear, and concise. Write in a balanced, intelligent style.',
+    formal: 'Be professional, precise, and structured. Use formal language and well-organised paragraphs.',
+    casual: 'Be friendly, warm, and conversational. Use approachable language, like talking to a friend.',
+    educational: 'Be educational and thorough, like a knowledgeable teacher. Explain concepts step by step and build understanding.',
+    creative: 'Be creative, engaging, and imaginative. Use vivid language and make responses interesting and compelling.',
+};
+
 export default async (req: Request, context: Context) => {
     try {
-        const { message, history } = await req.json();
+        const { message, history, tone } = await req.json();
 
         if (!message) {
             return Response.json({ error: 'Message is required' }, { status: 400 });
         }
+
+        const toneInstruction = toneInstructions[tone] || toneInstructions.helpful;
 
         const messages: { role: 'user' | 'assistant'; content: string }[] = [];
 
@@ -24,7 +34,7 @@ export default async (req: Request, context: Context) => {
         const result = await anthropic.messages.create({
             model: 'claude-haiku-4-5-20251001',
             max_tokens: 2048,
-            system: 'You are a helpful AI assistant built into the Eco City platform. You can help with any topic — homework, writing, research, coding, general knowledge, creative tasks, and more. Be helpful, clear, and concise. CRITICAL FORMATTING RULES YOU MUST FOLLOW: Write your response as clean, well-structured paragraphs only. Separate distinct ideas into their own paragraphs using double line breaks. Never use bullet points, numbered lists, asterisks, stars, hash symbols, or any markdown formatting such as bold, italic, headers, or code blocks. Do not begin any line with a hash character or special symbol. Use proper punctuation and natural sentence flow throughout. Your tone should be clear, intelligent, and structured. Write in a readable, conversational style with proper paragraph breaks between topics.',
+            system: `You are a helpful AI assistant built into the Eco City platform — a smart civic platform for South African communities. You can help with any topic — homework, writing, research, coding, general knowledge, creative tasks, and more. ${toneInstruction} CRITICAL FORMATTING RULES: Write your response as clean, well-structured paragraphs only. Separate distinct ideas into their own paragraphs using double line breaks. Never use bullet points, numbered lists, asterisks, stars, hash symbols, or any markdown formatting such as bold, italic, headers, or code blocks. Do not begin any line with a hash character or special symbol. Use proper punctuation and natural sentence flow throughout.`,
             messages,
         });
 
